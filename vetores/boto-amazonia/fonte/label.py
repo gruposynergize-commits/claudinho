@@ -57,8 +57,8 @@ waves=trace(wm,BOX)
 # boto: cabeça no canto superior esquerdo, inteira dentro da moldura
 s=1.30; head,headbody=vazado(f'matrix({s} 0 0 {s} {48-95*s:.1f} {50-250*s:.1f})',art)
 # cauda no canto inferior direito, saindo "da água"
-corner='M790 200H1010V345H790Z'
-t=1.15; tail,tailbody=vazado(f'matrix({t} 0 0 {-t} {905-290*t:.1f} {228+647*t:.1f})',art,corner)
+corner='M760 200H1010V345H760Z'
+t=1.15; tail,tailbody=vazado(f'matrix({-t} 0 0 {-t} {880+290*t:.1f} {228+647*t:.1f})',art,corner)
 # logo horizontal
 logo=''.join(drawing_d(L[i]) for i in range(13,26))
 ls=470/491; logo_g=f'<g id="logo-crazy-fox" fill="{PINK}" transform="matrix({ls:.4f} 0 0 {ls:.4f} {350-189*ls:.1f} {158-229*ls:.1f})"><path d="{logo}"/></g>'
