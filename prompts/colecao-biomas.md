@@ -95,3 +95,33 @@ BACK: merge the two attached designs —
 
 Clean vector-ready shapes, crisp edges, flat fills, ready for vectorization.
 ```
+
+---
+
+## ETIQUETA DO VELCRO — Rosa / Boto (versão escura)
+
+Anexos: (1) etiqueta verde da onça (referência de design), (2) forma da etiqueta rosa (contorno),
+(3) verso final do grip boto (referência de arte: boto, ondas curvas, bandeira).
+
+```
+Create a FLAT 2D vector artwork (not a photo, no 3D, no shadows, no texture) of a velcro strap label, front view, horizontal, proportion 115 x 38 mm.
+
+SHAPE: use EXACTLY the outline of attached image 2 — horizontal rectangle with rounded left corners and a pointed arrow tip on the right, an outer border and a thin inner frame line following the same shape, and the small chevron ">" near the arrow tip. Keep the shape, the double frame and the chevron identical.
+
+DESIGN SYSTEM: follow the layout logic of attached image 1 (the green jaguar label), rotated to horizontal: the animal PEEKING IN from two opposite corners, cropped by the inner frame, the CRAZY FOX logo in the center, a subtle tone-on-tone background pattern, and the word LEFT next to the chevron.
+
+ANIMAL: the pink river dolphin (boto) in exactly the same style as attached image 3 — solid silhouette filled with decorative bands (waves, spirals, scales, triangles), flame-like halo. Top-left corner: the dolphin's head and beak entering the frame, one eye visible. Bottom-right corner (before the arrow tip): the tail fin and a splash entering the frame. Both cropped by the inner frame line, like the jaguar faces in image 1.
+
+BACKGROUND PATTERN: the curling wave motif from attached image 3 (Japanese-style curling waves), scattered, very subtle tone-on-tone.
+
+LOGO: the CRAZY FOX logo (hexagon symbol + wordmark) exactly as in attached image 1, horizontal, centered in the label. Text "LEFT" small, next to the chevron.
+
+COLORS — DARK VERSION, strict monochrome, one hue only:
+- Label background: #4F1728 (darkest wine)
+- Background wave pattern: #5E1F35 (barely visible)
+- Border, inner frame, chevron, logo, LEFT: #C95F77
+- Dolphin silhouettes: #A7405A, with the inner decorative bands in #C95F77
+No other colors, no white, no black.
+
+Clean vector-ready shapes, crisp edges, flat fills, ready for vectorization.
+```
