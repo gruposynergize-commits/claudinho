@@ -175,3 +175,23 @@ COLOURS: strap dark wine #4F1728 woven velcro; cuff black neoprene with a wine t
 
 LIGHT AND QUALITY: soft diffused key light from the front-top plus gentle fill, so the suede texture reads without creating any relief in the print; soft natural contact shadow. Photographic realism, true material texture, crisp edges, sharp focus across the whole product, high resolution, e-commerce catalogue quality, consistent with the approved palm-side packshot.
 ```
+
+---
+
+## IMAGEM PUBLICITÁRIA — par flutuando — Rosa / Boto
+
+Anexos: (1) render da onça com o par flutuando (composição), (2) packshots aprovados do boto (palma + verso).
+
+```
+Ultra-realistic advertising product photograph. Recreate the exact composition of attached image 1 — two CRAZY FOX CrossFit hand grips floating diagonally in mid-air: the upper grip shows the PALM side, pointing to the lower left, with its wrist strap at the upper right; the lower grip shows the BACK side, pointing to the upper right, with its wrist strap at the lower left. Same angles, same perspective, same framing and spacing as image 1.
+
+THE PRODUCTS ARE EXACTLY THE APPROVED GRIPS OF ATTACHED IMAGE 2 — same design, colours, materials and details, only seen at this new angle:
+- Palm grip: raspberry #C95F77 panel with fine woven micro-texture and slight satin sheen, dark wine #4F1728 paw pads, curling river waves in #A7405A, thin printed outline; dark wine woven velcro strap with the soft-PVC label (pink outlined dolphin, CRAZY FOX logo, waves, LEFT, chevron) — the label is the only element with subtle raised relief.
+- Back grip: matte suede-like raspberry microfiber, the dark wine dolphin with decorative bands, the conceptual flag and waves, printed finger wedges and the CRAZY FOX logo near the fingers; plain dark wine velcro strap over a black-wine neoprene cuff.
+
+MATERIAL RULES: thin flat flexible panels (about 2 mm) with clean die-cut edges, no padding, no piping, no stitched border. Everything on the panels is flat printed ink — zero thickness, no embossing, no raised pads, no relief (unlike image 1, the rosettes/pads must NOT be embossed). The fabric and suede textures stay visible through the ink.
+
+BACKGROUND AND LIGHT: seamless deep wine studio background #3A0F1C with a soft darker vignette toward the edges. Premium advertising studio lighting: large softbox key light from the upper left, subtle rim light outlining the edges of both grips, gentle fill, soft realistic drop shadows under each floating grip on the background, controlled highlights on the satin palm and the PVC label.
+
+QUALITY: ultra-high resolution, hyper-realistic material rendering (visible weave, suede nap, velcro hooks, neoprene grain), razor-sharp focus on both products, true-to-life colour, premium sports-brand campaign look. Strictly monochrome raspberry-to-wine palette — no yellow, no green, no navy, no white, no black print. No text, no watermark, nothing else in the scene.
+```
