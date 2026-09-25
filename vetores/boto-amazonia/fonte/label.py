@@ -19,6 +19,20 @@ def clipped(d,tf,*clips):
     for c in clips: m&=mask([(c,'')],BOX)
     return trace(m,BOX)
 dol=drawing_d(V[3])
+import cv2
+def vazado(tf,*clips,ring=3.5):
+    m=mask([(dol,f'transform="{tf}"')],BOX)
+    inv=(~m).astype(np.uint8)
+    h,w=inv.shape; ff=np.zeros((h+2,w+2),np.uint8)
+    cv2.floodFill(inv,ff,(0,0),2)
+    filled=inv!=2
+    k=int(ring*clip.R)*2+1
+    er=cv2.erode(filled.astype(np.uint8),cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(k,k)))>0
+    out=(filled&~m)|(filled&~er)
+    body=filled.copy()
+    for c in clips:
+        cm=mask([(c,'')],BOX); out&=cm; body&=cm
+    return trace(out,BOX),trace(body,BOX)
 # ondas (padrão tom sobre tom)
 w6,w5=drawing_d(V[6]),drawing_d(V[5])
 import cv2
@@ -41,10 +55,10 @@ for d,tf in [(w6,'translate(380 -135)'),(w5,'translate(470 -420)'),(w6,'translat
 wm&=mask([(art,'')],BOX)
 waves=trace(wm,BOX)
 # boto: cabeça no canto superior esquerdo, inteira dentro da moldura
-s=1.30; head=clipped(dol,f'matrix({s} 0 0 {s} {48-95*s:.1f} {50-250*s:.1f})',art)
+s=1.30; head,headbody=vazado(f'matrix({s} 0 0 {s} {48-95*s:.1f} {50-250*s:.1f})',art)
 # cauda no canto inferior direito, saindo "da água"
 corner='M790 200H1010V345H790Z'
-t=1.15; tail=clipped(dol,f'matrix({t} 0 0 {-t} {905-290*t:.1f} {228+647*t:.1f})',art,corner)
+t=1.15; tail,tailbody=vazado(f'matrix({t} 0 0 {-t} {905-290*t:.1f} {228+647*t:.1f})',art,corner)
 # logo horizontal
 logo=''.join(drawing_d(L[i]) for i in range(13,26))
 ls=470/491; logo_g=f'<g id="logo-crazy-fox" fill="{PINK}" transform="matrix({ls:.4f} 0 0 {ls:.4f} {350-189*ls:.1f} {158-229*ls:.1f})"><path d="{logo}"/></g>'
@@ -58,7 +72,9 @@ svg=f'''<?xml version="1.0" encoding="UTF-8"?>
 <path id="fundo" fill="{BG}" d="{inner_bg}"/>
 <path id="padrao-ondas" fill="{DARK2}" fill-rule="evenodd" d="{waves}"/>
 <path id="moldura-interna" fill="{PINK}" fill-rule="evenodd" d="{frame_out} {frame_in}"/>
+<path id="boto-cabeca-fundo" fill="{BG}" d="{headbody}"/>
 <path id="boto-cabeca" fill="{PINK}" fill-rule="evenodd" d="{head}"/>
+<path id="boto-cauda-fundo" fill="{BG}" d="{tailbody}"/>
 <path id="boto-cauda" fill="{PINK}" fill-rule="evenodd" d="{tail}"/>
 {logo_g}
 <g id="left" transform="translate(955 202)">{left}</g>
