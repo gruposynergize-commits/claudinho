@@ -1,4 +1,7 @@
-# CRAZY FOX — Coleção Biomas · Prompts de conceito (v3)
+# CRAZY FOX — Coleção Biomas · Prompts de conceito (v4)
+
+v4: monocromático rígido (um só matiz, painel na cor do tecido), bandeira conceitual em linhas
+orgânicas, animal mais detalhado com halo recortado, almofadas planas reforçadas.
 
 v3: arte do verso no estilo da referência da cobra — silhueta chapada preenchida com padrões
 geométricos internos + halo recortado em volta. Palma, formato e almofadas iguais à v2.
@@ -18,13 +21,15 @@ Premium product photograph of a pair of CRAZY FOX CrossFit hand grips floating d
 
 SHAPE — follow the attached reference exactly: the grip is a tall paw silhouette, wider rounded top with soft finger bumps, a gentle waist in the middle and a straight bottom edge, with a thin darker border piping all around. Not a rectangle, not a boot shape.
 
-MATERIAL: woven basket-weave technical fabric with a fine ribbed micro-texture. The whole piece is MONOCHROMATIC: panel, piping, artwork, pads and straps are one color family, only light to dark shades.
+MATERIAL: woven basket-weave technical fabric with a fine ribbed micro-texture.
 
-ART STYLE OF THE BACK ARTWORK (very important): follow the attached snake illustration as STYLE reference — bold flat graphic folk-art / linocut look. The animal is a SOLID dark silhouette, filled inside with bands of decorative patterns in the light tone (small geometric motifs: dots, rings, squares, triangles, stripes, wavy lines, leaf and flame shapes), each body section with a different pattern. Around the whole silhouette, a thick jagged flame-like halo outline in a medium tone, and a few small splatter dots scattered around. Flat colors only, no gradients, no realism, no shading, no thin sketchy lines. Strong, dynamic, serious, never cute. Adapted to the color family: only 3 tones (darkest silhouette, medium halo, light pattern details) over the panel color.
+STRICT MONOCHROME (very important): the entire image uses ONE single hue — the COLOR FAMILY defined below. The panel is the exact panel color, NOT a pale or pastel version of it. Every other element (piping, artwork, flag, splashes, pads, straps, background) is only a darker or slightly lighter shade of that same hue. No second hue, no saturated or neon accent, no magenta, no white, no black.
 
-PALM SIDE: NO jaguar spots, NO leopard pattern. Instead a subtle tone-on-tone pattern made of the BIOME PATTERN motif (defined below), drawn as simple thin line icons, scattered irregularly, low contrast. PAW PADS on top of it: four rounded toe pads and one large three-lobed central pad, cat-paw shape as in the reference, printed completely FLAT in the darkest shade — matte ink, flush with the fabric, zero thickness, no dome, no bevel, no shadow, no edge highlight.
+ART STYLE OF THE BACK ARTWORK (very important): follow the attached snake illustration as STYLE reference — bold flat graphic folk-art / linocut look, rich in detail. The animal is a SOLID dark silhouette with organic, flowing, curved contours (no straight rigid lines), filled inside with many bands of decorative patterns in a lighter shade (small motifs: dots, rings, scales, waves, leaf and flame shapes), each body section with a different pattern. Around the whole silhouette, a thick jagged flame-like halo in a medium shade, plus small splatter dots around it. Flat shades only, no gradients, no realism, no shading. Strong, dynamic, serious, never cute. Only 3 shades of the same hue: darkest silhouette, medium halo, lighter pattern details.
 
-BACK SIDE: the ANIMAL (defined below) in the art style above, large, filling most of the panel in a dynamic curved pose. Behind the animal, the Brazilian flag emblem as a bold flat geometric shape in the medium tone: a rhombus with a circle inside and one curved band across the circle, the band filled with a small repeating pattern — no stars, no text. The animal overlaps the emblem. Keep the lower third of the panel clear for the L / LEFT side markings; the artwork must not be covered by them. The CRAZY FOX logo small, near the top finger area, rotated along the edge as in the reference.
+PALM SIDE: NO jaguar spots, NO leopard pattern. Instead a subtle tone-on-tone pattern made of the BIOME PATTERN motif (defined below), drawn as simple thin line icons, scattered irregularly, low contrast. PAW PADS on top of it: four rounded toe pads and one large three-lobed central pad, cat-paw shape as in the reference, printed completely FLAT in the darkest shade — matte ink, flush with the fabric, zero thickness, no dome, no bevel, no shadow, no edge highlight. They must look like printed ink, exactly like the lines of the palm pattern, never like raised rubber.
+
+BACK SIDE: the ANIMAL (defined below) in the art style above, large, filling most of the panel in a dynamic curved pose. Behind the animal, a CONCEPTUAL Brazilian flag: only suggested, very simple, drawn with a few organic flowing curved lines in the medium shade — a loose, hand-drawn rhombus whose sides curve like river currents, a simple open circle inside it and one sweeping curved band across it. No dots, no text, no stars, no pattern inside, no solid fill, no rigid geometry. It reads as the flag at a glance but feels like part of the illustration. The animal overlaps it. Keep the lower third of the panel clear for the L / LEFT side markings; the artwork must not be covered by them. The CRAZY FOX logo small, near the top finger area, rotated along the edge as in the reference.
 
 BACKGROUND: a darker tone of the same color family with a very subtle flat line-art landscape of the biome (defined below), low contrast.
 ```
@@ -34,8 +39,8 @@ BACKGROUND: a darker tone of the same color family with a very subtle flat line-
 ## 1 · ROSA FRAMBOESA — Amazônia — Boto-cor-de-rosa
 
 ```
-COLOR FAMILY: raspberry pink. Panel #C0506E, piping and straps #8A3350, artwork and pads #5E1F35, background #4A1A2B.
-ANIMAL: an Amazon river dolphin (boto) leaping in a strong S-curved arc, long beak, focused eye, powerful body. Inside the silhouette: bands of wave lines, water rings, fish-scale shapes and small triangles. Stylized water splashes as flat shapes. Serious, never smiling.
+COLOR FAMILY: raspberry pink. Panel #C0506E (raspberry, not pale pink), piping and straps #8A3350, artwork and pads #5E1F35, background #4A1A2B.
+ANIMAL: an Amazon river dolphin (boto) leaping in a strong S-curved arc, long beak, focused eye, powerful body. Inside the silhouette: bands of wave lines, water rings, fish-scale shapes and small triangles. More detail: dorsal and pectoral fins with feather-like pattern bands, eye with a ring motif, stylized water splashes as flat flowing shapes. Serious, never smiling.
 BIOME PATTERN (palm): simple river wave lines and small water-ripple circles.
 BIOME LANDSCAPE: Amazon river with tall rainforest trees and hanging vines, simple line art.
 ```
