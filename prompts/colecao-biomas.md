@@ -151,3 +151,27 @@ NEW DESIGN (replace the white/black/pink/green of the originals):
 
 SHOT — STUDIO PACKSHOT: only the product, no hand, no person, no gym. One grip standing perfectly upright and centred, straight front view (camera square to the palm, no tilt, no perspective distortion), palm side facing the camera, fingers of the paw at the top, the strap closed in a loop at the bottom with the velcro label facing the camera. Seamless studio background in dark wine #4F1728, evenly lit. Soft diffused key light from the front-top plus gentle fill, so the fine fabric texture reads clearly without creating any relief in the print; soft natural contact shadow under the product. Photographic realism: true material texture, crisp edges, sharp focus across the whole product, high resolution, e-commerce catalogue quality. Strictly monochrome raspberry-to-wine palette — no white, no black print, no neon pink, no green.
 ```
+
+---
+
+## RENDER 3D — VERSO (packshot de estúdio) — Rosa / Boto
+
+Anexos: (1) foto real do verso na barra, (2) render verso da onça (composição), (3) arte do verso boto (PDF final),
+(4) logo CRAZY FOX rosa.
+
+```
+Photorealistic studio product photograph of the BACK side of a CRAZY FOX CrossFit hand grip. Same composition as attached image 2: one grip standing perfectly upright and centred, straight front view of the back side, finger area at the top, the wrist strap closed in a loop at the bottom. Only the product: no hand, no person, no gym.
+
+REAL PRODUCT CONSTRUCTION (copy from attached photo 1):
+- One thin, flat, flexible panel (about 2 mm), cut in the paw silhouette, no padding, no piping, no stitched border; clean die-cut edge where the thin layers of the material are slightly visible.
+- Back surface: matte suede-like microfiber with a fine soft nap, exactly like photo 1.
+- The outline is a THIN PRINTED LINE a few millimetres inside the edge. The three finger marks at the top are PRINTED tapered wedges coming from the edge, not cuts.
+- Everything on the panel is flat ink printed on the suede: zero thickness, no relief, no embossing, no raised elements. The suede nap stays visible through the ink.
+- Wrist part: flat woven velcro strap over a neoprene cuff, as in photo 1. On this side the strap is plain (no label).
+
+ARTWORK: print exactly the artwork of attached image 3 on the back panel — raspberry #C95F77 surface, curling river waves and the conceptual flag in #A7405A, the dolphin as a dark wine #4F1728 silhouette with its decorative bands, the finger wedges and the outline in #8A3350 / #4F1728, all in the same positions and proportions. The CRAZY FOX logo near the fingers exactly as in image 3, with the letterforms of attached image 4 (do not invent a font).
+
+COLOURS: strap dark wine #4F1728 woven velcro; cuff black neoprene with a wine tint. Seamless studio background in dark wine #4F1728. Strictly monochrome raspberry-to-wine palette — no yellow, no green, no white, no black print.
+
+LIGHT AND QUALITY: soft diffused key light from the front-top plus gentle fill, so the suede texture reads without creating any relief in the print; soft natural contact shadow. Photographic realism, true material texture, crisp edges, sharp focus across the whole product, high resolution, e-commerce catalogue quality, consistent with the approved palm-side packshot.
+```
