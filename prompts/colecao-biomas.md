@@ -128,7 +128,7 @@ Clean vector-ready shapes, crisp edges, flat fills, ready for vectorization.
 
 ---
 
-## RENDER 3D REALISTA — Rosa / Boto (v2, fiel ao produto original)
+## RENDER 3D REALISTA — Rosa / Boto (v3, packshot de estúdio, fiel ao produto original)
 
 Anexos: (1) foto do produto original — palma com a pata, (2) foto do produto original — verso na barra,
 (3) arte da palma rosa, (4) arte da etiqueta do velcro, (5) amostra do tecido rosa trançado.
@@ -149,5 +149,5 @@ NEW DESIGN (replace the white/black/pink/green of the originals):
 - Velcro label: exactly the artwork of attached image 4 — dark wine patch with the pink outlined dolphin, CRAZY FOX logo, waves, LEFT and chevron, in the same soft-PVC finish as photo 1.
 - Strap: dark wine #4F1728 woven velcro. Cuff: black neoprene with a wine tint.
 
-SHOT: same framing as photo 1 — a hand holding the grip upright, palm side to the camera, in a gym with a softly blurred background (rack and barbell), natural window light. Photographic realism: true material texture, real fingers and skin, slight natural bend of the thin panel, sharp focus on the panel, shallow depth of field, high resolution. Strictly monochrome raspberry-to-wine palette on the product — no white, no black print, no neon pink, no green.
+SHOT — STUDIO PACKSHOT: only the product, no hand, no person, no gym. One grip standing perfectly upright and centred, straight front view (camera square to the palm, no tilt, no perspective distortion), palm side facing the camera, fingers of the paw at the top, the strap closed in a loop at the bottom with the velcro label facing the camera. Seamless studio background in dark wine #4F1728, evenly lit. Soft diffused key light from the front-top plus gentle fill, so the fine fabric texture reads clearly without creating any relief in the print; soft natural contact shadow under the product. Photographic realism: true material texture, crisp edges, sharp focus across the whole product, high resolution, e-commerce catalogue quality. Strictly monochrome raspberry-to-wine palette — no white, no black print, no neon pink, no green.
 ```
