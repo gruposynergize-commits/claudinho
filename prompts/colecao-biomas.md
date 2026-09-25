@@ -71,3 +71,27 @@ ANIMAL: a jaguar (onça-pintada) crouching and stalking, head low, intense eyes.
 BIOME PATTERN (palm): small bromeliad and fern leaf outlines.
 BIOME LANDSCAPE: Atlantic Forest hills with palms, bromeliads and ferns, simple line art.
 ```
+
+---
+
+## ARTE PLANA — Rosa / Boto (mescla aprovada)
+
+Anexos, nesta ordem: (1) grip rosa com a bandeira aprovada, (2) grip rosa com o boto aprovado,
+(3) contorno do VERSO, (4) contorno da PALMA.
+
+```
+Create a FLAT 2D technical artwork sheet (not a photo, no 3D, no perspective, no shadows, no fabric texture), plain background #4A1A2B, showing two grip panels side by side, front view, same size:
+
+LEFT = PALM, RIGHT = BACK. Use EXACTLY the outlines of attached images 3 (back) and 4 (palm): same silhouette, same finger slits on the back, same proportions, straight bottom edge. Thin border in #8A3350. Panel fill #C0506E.
+
+STRICT MONOCHROME: only shades of the same raspberry hue — #C0506E, #A8405E, #8A3350, #5E1F35. No other colors, no white, no black.
+
+PALM (from attached image 4): the four toe pads and the three-lobed central pad exactly where the outline shows them, filled flat #5E1F35. Around them a subtle tone-on-tone pattern of river wave lines and small water-ripple circles in #A8405E, like attached image 2.
+
+BACK: merge the two attached designs —
+- DOLPHIN: exactly the dolphin from attached image 2 (S-curved leaping boto, solid dark #5E1F35 silhouette filled with bands of decorative patterns: waves, rings, scales, triangles, zigzags; flame-like splash halo in #8A3350 around it). Keep its style and details.
+- FLAG: exactly the flag style from attached image 1 (conceptual, organic flowing curved lines suggesting the rhombus, circle and band, medium tone #A8405E, no fill pattern, no text) — but about 30% BIGGER than in image 1, sitting behind the dolphin, the dolphin overlapping it.
+- Keep the CRAZY FOX logo and its position from attached image 3 (along the top, near the fingers), and the L / LEFT tabs in the same position and shape as image 3, in #5E1F35. The artwork must not overlap the L / LEFT tabs.
+
+Clean vector-ready shapes, crisp edges, flat fills, ready for vectorization.
+```
