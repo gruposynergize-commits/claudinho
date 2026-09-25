@@ -142,7 +142,7 @@ REAL PRODUCT CONSTRUCTION (copy from photos 1 and 2):
 - Palm side: smooth synthetic surface with a very fine woven micro-texture (like the weave in attached image 5), slight satin sheen. Back side: matte suede-like microfiber.
 - The three finger marks on the back are PRINTED tapered wedges coming from the edge, not cuts.
 - Everything printed on the panel (pads, waves, outline, logo, dolphin) is flat ink on the surface: zero thickness, no relief, no embossing, no raised pads. The fine surface texture remains visible through the ink.
-- Wrist: a flat woven velcro strap wrapped around the wrist over a black neoprene cuff, exactly as in photo 1. On the strap, a moulded soft-PVC label patch — the ONLY element with a subtle raised relief (raised logo and frame), exactly like the pink label in photo 1.
+- Wrist part: a flat woven velcro strap over a black neoprene cuff, exactly as in photo 1 (closed in a loop, no hand inside). On the strap, a moulded soft-PVC label patch — the ONLY element with a subtle raised relief (raised logo and frame), exactly like the pink label in photo 1.
 
 NEW DESIGN (replace the white/black/pink/green of the originals):
 - Palm panel: exactly the artwork of attached image 3 — raspberry #C95F77 surface, the pads in dark wine #4F1728, the curling river-wave pattern in #A7405A, printed outline in #8A3350.
