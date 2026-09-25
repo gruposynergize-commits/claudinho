@@ -128,23 +128,26 @@ Clean vector-ready shapes, crisp edges, flat fills, ready for vectorization.
 
 ---
 
-## RENDER 3D REALISTA — Rosa / Boto (palma + etiqueta do velcro)
+## RENDER 3D REALISTA — Rosa / Boto (v2, fiel ao produto original)
 
-Anexos: (1) render da onça amarela (composição), (2) arte da palma rosa, (3) arte da etiqueta do velcro,
-(4) amostra do tecido rosa trançado.
+Anexos: (1) foto do produto original — palma com a pata, (2) foto do produto original — verso na barra,
+(3) arte da palma rosa, (4) arte da etiqueta do velcro, (5) amostra do tecido rosa trançado.
 
 ```
-Photorealistic studio product photograph of a CRAZY FOX CrossFit hand grip, same composition, camera angle, framing, lighting and dark background as attached image 1: one grip standing upright, palm side facing the camera, the wrist strap wrapped at the bottom with the velcro label on it.
+Photorealistic product photograph of a CRAZY FOX CrossFit hand grip. The product must be IDENTICAL in construction, material, thickness and proportions to the real product in attached photos 1 and 2 — only the colours and printed artwork change.
 
-REPLACE THE DESIGN, KEEP THE PRODUCT: the shape, silhouette, proportions, border piping, strap and construction are exactly as in image 1. Only the colours and printed artwork change.
+REAL PRODUCT CONSTRUCTION (copy from photos 1 and 2):
+- One thin, flat, flexible panel (about 2 mm), cut in the paw silhouette, no padding, no piping, no stitched border. The edge is a clean die-cut edge where the thin layers of the material are slightly visible.
+- The outline around the panel is a THIN PRINTED LINE a few millimetres inside the edge, not a seam or a raised border.
+- Palm side: smooth synthetic surface with a very fine woven micro-texture (like the weave in attached image 5), slight satin sheen. Back side: matte suede-like microfiber.
+- The three finger marks on the back are PRINTED tapered wedges coming from the edge, not cuts.
+- Everything printed on the panel (pads, waves, outline, logo, dolphin) is flat ink on the surface: zero thickness, no relief, no embossing, no raised pads. The fine surface texture remains visible through the ink.
+- Wrist: a flat woven velcro strap wrapped around the wrist over a black neoprene cuff, exactly as in photo 1. On the strap, a moulded soft-PVC label patch — the ONLY element with a subtle raised relief (raised logo and frame), exactly like the pink label in photo 1.
 
-PALM PANEL: print exactly the artwork of attached image 2 — raspberry panel #C95F77, the four toe pads and the central pad in dark wine #4F1728, and the curling river-wave pattern in #A7405A, all in the same positions as image 2. Border piping in #8A3350.
+NEW DESIGN (replace the white/black/pink/green of the originals):
+- Palm panel: exactly the artwork of attached image 3 — raspberry #C95F77 surface, the pads in dark wine #4F1728, the curling river-wave pattern in #A7405A, printed outline in #8A3350.
+- Velcro label: exactly the artwork of attached image 4 — dark wine patch with the pink outlined dolphin, CRAZY FOX logo, waves, LEFT and chevron, in the same soft-PVC finish as photo 1.
+- Strap: dark wine #4F1728 woven velcro. Cuff: black neoprene with a wine tint.
 
-VELCRO LABEL on the strap: print exactly the artwork of attached image 3 — dark wine label with the pink outlined dolphin, the CRAZY FOX logo, the waves, LEFT and the chevron. Same shape and proportions as the label in image 1.
-
-STRAP AND WRIST CUFF: dark wine #4F1728 woven webbing and velcro, with the neoprene cuff in a near-black wine tone.
-
-MATERIAL — MOST IMPORTANT: the panel is a woven technical fabric with the basket-weave texture of attached image 4, clearly visible up close: interlaced flat strands, fine ribs, soft fibre sheen. EVERYTHING ON THE PANEL IS PRINTED INK ON THIS FABRIC — completely flat, zero thickness, no relief, no embossing, no raised pads, no bevel, no edge shadow, no rubber or silicone look. The weave texture continues uninterrupted through the pads, the waves and every printed area; the ink only changes the colour of the threads. The label is a flat printed/woven patch sewn on the strap, with visible stitching around its edge.
-
-REALISM: macro-level fabric detail, true-to-life colour, soft key light from the upper left grazing the surface so the weave texture reads (without creating any relief in the print), subtle contact shadow, slight natural fabric curvature, crisp focus, 8k, high-end sports brand catalogue quality. Strictly monochrome raspberry-to-wine palette — no yellow, no green, no navy, no other colours.
+SHOT: same framing as photo 1 — a hand holding the grip upright, palm side to the camera, in a gym with a softly blurred background (rack and barbell), natural window light. Photographic realism: true material texture, real fingers and skin, slight natural bend of the thin panel, sharp focus on the panel, shallow depth of field, high resolution. Strictly monochrome raspberry-to-wine palette on the product — no white, no black print, no neon pink, no green.
 ```
