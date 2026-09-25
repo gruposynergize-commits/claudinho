@@ -215,3 +215,37 @@ BACKGROUND AND LIGHT: seamless deep wine studio sweep #3A0F1C (floor and wall in
 
 QUALITY: ultra-high resolution, hyper-realistic material rendering (visible weave, suede nap, velcro hooks, neoprene grain), sharp focus on both products with a gentle depth of field falloff in the background, true-to-life colour, premium sports-brand campaign look. Strictly monochrome raspberry-to-wine palette — no yellow, no green, no navy, no white, no black print. No text, no watermark, nothing else in the scene.
 ```
+
+---
+
+## LIFESTYLE 1 — atleta segurando o par — Rosa / Boto
+
+Anexos: (1) foto da atleta segurando os grips da onça (composição), (2) packshots aprovados do boto (palma + verso).
+
+```
+Ultra-realistic lifestyle advertising photograph. Recreate the exact composition, framing, pose and light of attached image 1: close crop of a female athlete (face cropped above the lips, off-white sleeveless tank top, sweaty sun-kissed skin with chalk dust on hands and arms) holding a pair of CRAZY FOX CrossFit hand grips up next to her chest — the left grip shows the PALM side, the right grip shows the BACK side, both worn on her wrists with the velcro straps closed, her fingers holding the top of the panels.
+
+REPLACE ONLY THE PRODUCTS with the approved grips of attached image 2 — same design, colours, materials and details:
+- Palm grip: raspberry #C95F77 panel with fine woven micro-texture and slight satin sheen, dark wine #4F1728 paw pads, curling river waves in #A7405A, thin printed outline; dark wine velcro strap with the soft-PVC label (pink outlined dolphin, CRAZY FOX logo, waves, LEFT, chevron).
+- Back grip: matte suede-like raspberry microfiber with the dark wine dolphin, conceptual flag, waves, printed finger wedges and CRAZY FOX logo; plain dark wine velcro strap over a black-wine neoprene cuff.
+- Thin flat flexible panels (about 2 mm), clean die-cut edges, no piping. All artwork is flat printed ink — no embossing, no raised pads, no relief. Realistic use: light chalk dust and a few sand grains on the panels.
+
+SCENE: sandy beach with soft green dune vegetation, heavily blurred background, warm golden-hour sunlight from the side, natural skin tones. Photographic realism: shot on a full-frame camera with an 85 mm lens, shallow depth of field, sharp focus on the grips, real skin texture, fine chalk and sweat detail, high resolution, premium sports-brand campaign look. Only the grips carry the raspberry-to-wine palette — no yellow, green or navy on the products. No text overlay, no watermark.
+```
+
+---
+
+## LIFESTYLE 2 — grips pendurados na bolsa — Rosa / Boto
+
+Anexos: (1) foto da atleta com a bolsa e os grips pendurados (composição), (2) packshots aprovados do boto (palma + verso).
+
+```
+Ultra-realistic lifestyle advertising photograph. Recreate the exact composition, framing, pose and light of attached image 1: a female athlete (face cropped at the chin, off-white sleeveless top and off-white shorts) walking on the beach with a large off-white canvas tote bag on her shoulder; a pair of CRAZY FOX CrossFit hand grips hangs from the bag handle by their velcro straps — the left grip hanging with its BACK side facing the camera, the right grip hanging with its PALM side facing the camera, the thin panels resting against the canvas.
+
+REPLACE ONLY THE PRODUCTS with the approved grips of attached image 2 — same design, colours, materials and details:
+- Palm grip: raspberry #C95F77 panel with fine woven micro-texture and slight satin sheen, dark wine #4F1728 paw pads, curling river waves in #A7405A, thin printed outline; dark wine velcro strap with the soft-PVC label (pink outlined dolphin, CRAZY FOX logo, waves, LEFT, chevron).
+- Back grip: matte suede-like raspberry microfiber with the dark wine dolphin, conceptual flag, waves, printed finger wedges and CRAZY FOX logo; plain dark wine velcro strap over a black-wine neoprene cuff, looped around the bag handle.
+- Thin flat flexible panels (about 2 mm) that hang and bend naturally with gravity, clean die-cut edges, no piping. All artwork is flat printed ink — no embossing, no raised pads, no relief. Realistic use: a little sand on the straps and on the bottom of the bag.
+
+SCENE: beach at soft golden hour, sea and sand heavily blurred in the background, warm natural sunlight, natural skin tones. Photographic realism: full-frame camera, 50–85 mm lens, shallow depth of field, sharp focus on the grips, real canvas and fabric texture, high resolution, premium sports-brand campaign look. Only the grips carry the raspberry-to-wine palette — no yellow, green or navy on the products. No text overlay, no watermark.
+```
