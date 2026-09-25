@@ -13,7 +13,12 @@ n,lab,st,_=cv2.connectedComponentsWithStats(m); big=1+np.argmax(st[1:,4])
 onda=trace(lab==big,box)
 box2=(90,245,340,420)
 head=trace(mask([(drawing_d(V[3]),'')],box2)&mask([('M90 245H340V405H90Z','')],box2),box2)
-pata=drawing_d(E[77])
+# bandeira conceitual: losango de lados curvos + círculo com faixa curva vazada
+def rh(cx,cy,w,h,b):
+    return (f'M{cx-w} {cy}Q{cx-w/2-b} {cy-h/2+b*0.4} {cx} {cy-h}Q{cx+w/2+b} {cy-h/2+b*0.4} {cx+w} {cy}'
+            f'Q{cx+w/2+b} {cy+h/2-b*0.4} {cx} {cy+h}Q{cx-w/2-b} {cy+h/2-b*0.4} {cx-w} {cy}Z')
+band='M-44 -12C-22 -28 22 -28 44 -6L44 8C22 -12 -22 -12 -44 4Z'
+bandeira=rh(0,0,120,78,10)+' '+rh(0,0,96,58,6)+' M-46 0A46 46 0 1 1 46 0A46 46 0 1 1 -46 0Z '+band
 def sym_pdf(d,bb):
     x0,y0,x1,y1=bb
     svg=f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{x0} {y0} {x1-x0} {y1-y0}" width="{x1-x0}" height="{y1-y0}"><path fill="{DARK}" fill-rule="evenodd" d="{d}"/></svg>'
@@ -32,7 +37,7 @@ def txt(x,y,s,size,w='r',color=DARK,center=False):
     p.insert_text((x,y),s,fontname='I'+w,fontsize=size,color=rgb(color) if isinstance(color,str) else color)
 txt(148,585,'SISTEMA DE IDENTIDADE / IDENTITY SYSTEM',26.3,'s')
 body1=['A coleção Biomas leva a CRAZY FOX para dentro da Amazônia.','O boto-cor-de-rosa, símbolo dos rios da floresta, é o animal','deste modelo; a bandeira aparece só sugerida atrás dele.']
-body2=['Uma única cor, do framboesa ao vinho, sem segunda tinta.','As ondas do rio se repetem como textura tom sobre tom,','o boto marca cada peça e a pata assina a linha inteira.']
+body2=['Uma única cor, do framboesa ao vinho, sem segunda tinta.','As ondas do rio se repetem como textura tom sobre tom,','o boto marca cada peça e a bandeira assina a origem.']
 for i,l in enumerate(body1): txt(148,622+27*i,l,19.3)
 for i,l in enumerate(body2): txt(148,731+27*i,l,19.3)
 pal=[('IGAPÓ','#4F1728'),('MARGEM','#8A3350'),('CORRENTEZA','#A7405A'),('BOTO','#C95F77')]
@@ -40,10 +45,10 @@ for i,(nm,h) in enumerate(pal):
     x=148+171*i
     p.draw_rect(pymupdf.Rect(x,848,x+154,916),color=None,fill=rgb(h),radius=0.03)
     txt(x,939,nm,13.2,'b'); txt(x,958,h,12.3,'r',GREY)
-syms=[('ONDA','textura / texture',onda,1043),('BOTO','marca / mark',head,1360),('PATA','forma / form',pata,1687)]
+syms=[('ONDA','textura / texture',onda,1043),('BOTO','marca / mark',head,1360),('BANDEIRA','origem / origin',bandeira,1687)]
 for nm,sub,d,cx in syms:
     bb=bbox_of(d); w,h=bb[2]-bb[0],bb[3]-bb[1]
-    sc=min(260/w,150/h) if nm=='BOTO' else min(170/w,150/h)
+    sc=min(260/w,150/h) if nm=='BOTO' else (min(230/w,150/h) if nm=='BANDEIRA' else min(170/w,150/h))
     W,H=w*sc,h*sc
     p.show_pdf_page(pymupdf.Rect(cx-W/2,788-H/2,cx+W/2,788+H/2),sym_pdf(d,bb),0)
     txt(cx,913,nm,26.3,'s',center=True); txt(cx,950,sub,17.6,'r',GREY,center=True)
