@@ -125,3 +125,26 @@ No other colors, no white, no black.
 
 Clean vector-ready shapes, crisp edges, flat fills, ready for vectorization.
 ```
+
+---
+
+## RENDER 3D REALISTA — Rosa / Boto (palma + etiqueta do velcro)
+
+Anexos: (1) render da onça amarela (composição), (2) arte da palma rosa, (3) arte da etiqueta do velcro,
+(4) amostra do tecido rosa trançado.
+
+```
+Photorealistic studio product photograph of a CRAZY FOX CrossFit hand grip, same composition, camera angle, framing, lighting and dark background as attached image 1: one grip standing upright, palm side facing the camera, the wrist strap wrapped at the bottom with the velcro label on it.
+
+REPLACE THE DESIGN, KEEP THE PRODUCT: the shape, silhouette, proportions, border piping, strap and construction are exactly as in image 1. Only the colours and printed artwork change.
+
+PALM PANEL: print exactly the artwork of attached image 2 — raspberry panel #C95F77, the four toe pads and the central pad in dark wine #4F1728, and the curling river-wave pattern in #A7405A, all in the same positions as image 2. Border piping in #8A3350.
+
+VELCRO LABEL on the strap: print exactly the artwork of attached image 3 — dark wine label with the pink outlined dolphin, the CRAZY FOX logo, the waves, LEFT and the chevron. Same shape and proportions as the label in image 1.
+
+STRAP AND WRIST CUFF: dark wine #4F1728 woven webbing and velcro, with the neoprene cuff in a near-black wine tone.
+
+MATERIAL — MOST IMPORTANT: the panel is a woven technical fabric with the basket-weave texture of attached image 4, clearly visible up close: interlaced flat strands, fine ribs, soft fibre sheen. EVERYTHING ON THE PANEL IS PRINTED INK ON THIS FABRIC — completely flat, zero thickness, no relief, no embossing, no raised pads, no bevel, no edge shadow, no rubber or silicone look. The weave texture continues uninterrupted through the pads, the waves and every printed area; the ink only changes the colour of the threads. The label is a flat printed/woven patch sewn on the strap, with visible stitching around its edge.
+
+REALISM: macro-level fabric detail, true-to-life colour, soft key light from the upper left grazing the surface so the weave texture reads (without creating any relief in the print), subtle contact shadow, slight natural fabric curvature, crisp focus, 8k, high-end sports brand catalogue quality. Strictly monochrome raspberry-to-wine palette — no yellow, no green, no navy, no other colours.
+```
