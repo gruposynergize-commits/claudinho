@@ -1,0 +1,27 @@
+# dependências
+node_modules/
+
+# build
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# cliente Prisma gerado
+src/generated/
+
+# ambiente (NUNCA versionar credenciais)
+.env
+.env.*
+!.env.example
+
+# testes
+coverage/
+test-results/
+playwright-report/
+blob-report/
+
+# sistema
+.DS_Store
+*.log

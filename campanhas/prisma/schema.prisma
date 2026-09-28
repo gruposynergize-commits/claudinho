@@ -1,0 +1,796 @@
+// =====================================================================
+// Schema do sistema de campanhas de números.
+//
+// Regras críticas que o Prisma não expressa (CHECKs, índices únicos
+// parciais, triggers de transição de estado e de imutabilidade) ficam na
+// migração `integrity` (SQL puro). Ver docs/ARQUITETURA.md.
+//
+// Convenções: dinheiro em centavos (Int); datas com fuso (timestamptz);
+// tabelas e colunas em snake_case.
+// =====================================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------
+
+enum UserRole {
+  ADMIN
+  OPERATOR
+  VIEWER
+
+  @@map("user_role")
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  CLOSED
+  FROZEN
+  DRAWN
+  CANCELLED
+
+  @@map("campaign_status")
+}
+
+enum NumberStatus {
+  AVAILABLE
+  RESERVED
+  PENDING_PAYMENT
+  PAID
+  CANCELLED
+  DRAWN
+  WINNER
+
+  @@map("number_status")
+}
+
+enum ReservationStatus {
+  ACTIVE
+  CONVERTED
+  EXPIRED
+  RELEASED
+
+  @@map("reservation_status")
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  EXPIRED
+  CANCELLED
+  REFUNDED
+  ERROR
+
+  @@map("order_status")
+}
+
+enum PaymentMode {
+  AUTOMATIC
+  MANUAL
+
+  @@map("payment_mode")
+}
+
+enum PaymentGateway {
+  MERCADO_PAGO
+  STATIC_PIX
+
+  @@map("payment_gateway")
+}
+
+enum PaymentStatus {
+  CREATING
+  PENDING
+  APPROVED
+  AMOUNT_MISMATCH
+  REJECTED
+  CANCELLED
+  EXPIRED
+  REFUNDED
+  CHARGED_BACK
+  FAILED
+
+  @@map("payment_status")
+}
+
+enum PaymentEventSource {
+  WEBHOOK
+  RECONCILIATION
+  STATUS_CHECK
+  EXPIRATION_JOB
+  MANUAL
+  CUSTOMER
+  SYSTEM
+
+  @@map("payment_event_source")
+}
+
+enum EventProcessingStatus {
+  RECEIVED
+  PROCESSED
+  IGNORED
+  FAILED
+  DUPLICATE
+  REJECTED
+
+  @@map("event_processing_status")
+}
+
+enum PrizeOrigin {
+  NOT_INFORMED
+  DONATION
+  PURCHASED
+  SPONSORSHIP
+  OTHER
+
+  @@map("prize_origin")
+}
+
+enum DrawMethod {
+  FEDERAL_LOTTERY
+  VERIFIABLE_HASH
+  CSPRNG
+
+  @@map("draw_method")
+}
+
+enum DrawStatus {
+  SNAPSHOT_CREATED
+  EXECUTED
+  FINALIZED
+  FAILED
+
+  @@map("draw_status")
+}
+
+enum DeliveryStatus {
+  PENDING_CONTACT
+  CONTACTED
+  DELIVERED
+  FAILED
+
+  @@map("delivery_status")
+}
+
+enum ActorType {
+  USER
+  SYSTEM
+  CUSTOMER
+  GATEWAY
+
+  @@map("actor_type")
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  CRITICAL
+
+  @@map("log_level")
+}
+
+enum PixKeyType {
+  CPF
+  CNPJ
+  EMAIL
+  PHONE
+  EVP
+
+  @@map("pix_key_type")
+}
+
+enum GatewayEnvironment {
+  SANDBOX
+  PRODUCTION
+
+  @@map("gateway_environment")
+}
+
+// ---------------------------------------------------------------------
+// Usuários e sessões do painel
+// ---------------------------------------------------------------------
+
+model User {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email             String    @unique
+  name              String
+  passwordHash      String    @map("password_hash")
+  role              UserRole
+  active            Boolean   @default(true)
+  failedLogins      Int       @default(0) @map("failed_logins")
+  lockedUntil       DateTime? @map("locked_until") @db.Timestamptz(3)
+  lastLoginAt       DateTime? @map("last_login_at") @db.Timestamptz(3)
+  passwordChangedAt DateTime  @default(now()) @map("password_changed_at") @db.Timestamptz(3)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  sessions          Session[]
+  notes             OrderNote[]
+  createdOrders     Order[]     @relation("OrderCreatedBy")
+  confirmedPayments Payment[]   @relation("PaymentConfirmedBy")
+  resolvedPayments  Payment[]   @relation("PaymentResolvedBy")
+  drawsCreated      Draw[]      @relation("DrawCreatedBy")
+  drawsExecuted     Draw[]      @relation("DrawExecutedBy")
+  drawsFinalized    Draw[]      @relation("DrawFinalizedBy")
+
+  @@map("users")
+}
+
+model Session {
+  /// SHA-256 (hex) do token do cookie. O token em si nunca é armazenado.
+  id         String   @id
+  userId     String   @map("user_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt  DateTime @map("expires_at") @db.Timestamptz(3)
+  lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  ip         String?
+  userAgent  String?  @map("user_agent")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// ---------------------------------------------------------------------
+// Campanha, números e prêmios
+// ---------------------------------------------------------------------
+
+model Campaign {
+  id                      String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug                    String         @unique
+  name                    String
+  shortDescription        String?        @map("short_description")
+  story                   String         @default("")
+  imageUrl                String?        @map("image_url")
+  status                  CampaignStatus @default(DRAFT)
+  totalNumbers            Int            @map("total_numbers")
+  firstNumber             Int            @default(1) @map("first_number")
+  numberDigits            Int            @default(4) @map("number_digits")
+  priceCents              Int            @map("price_cents")
+  currency                String         @default("BRL") @db.Char(3)
+  minNumbersPerOrder      Int            @default(1) @map("min_numbers_per_order")
+  maxNumbersPerOrder      Int            @default(100) @map("max_numbers_per_order")
+  maxNumbersPerCustomer   Int?           @map("max_numbers_per_customer")
+  reservationMinutes      Int            @default(10) @map("reservation_minutes")
+  paymentMinutes          Int            @default(30) @map("payment_minutes")
+  orderCodePrefix         String         @map("order_code_prefix")
+  requireCpf              Boolean        @default(false) @map("require_cpf")
+  requireEmail            Boolean        @default(false) @map("require_email")
+  salesStartAt            DateTime?      @map("sales_start_at") @db.Timestamptz(3)
+  salesEndAt              DateTime?      @map("sales_end_at") @db.Timestamptz(3)
+  drawScheduledAt         DateTime?      @map("draw_scheduled_at") @db.Timestamptz(3)
+  drawMethod              DrawMethod?    @map("draw_method")
+  /// Parâmetros do método (ex.: dígitos e regra de número não vendido).
+  drawMethodParams        Json?          @map("draw_method_params")
+  contactWhatsapp         String?        @map("contact_whatsapp")
+  contactEmail            String?        @map("contact_email")
+  contactInstagram        String?        @map("contact_instagram")
+  /// Lista de perguntas frequentes: [{ "q": "...", "a": "..." }]
+  faq                     Json           @default("[]")
+  complianceConfirmedAt   DateTime?      @map("compliance_confirmed_at") @db.Timestamptz(3)
+  complianceConfirmedById String?        @map("compliance_confirmed_by_id") @db.Uuid
+  /// Incrementado a cada alteração pelo painel (controle otimista).
+  version                 Int            @default(1)
+  createdAt               DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt               DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt               DateTime?      @map("deleted_at") @db.Timestamptz(3)
+
+  numbers         CampaignNumber[]
+  prizes          Prize[]
+  orders          Order[]
+  orderItems      OrderItem[]
+  reservations    Reservation[]
+  legalInfo       LegalInformation?
+  paymentSettings PaymentSettings?
+  draw            Draw?
+  drawSnapshots   DrawSnapshot[]
+
+  @@index([status])
+  @@map("campaigns")
+}
+
+model CampaignNumber {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaignId    String       @map("campaign_id") @db.Uuid
+  number        Int
+  status        NumberStatus @default(AVAILABLE)
+  reservationId String?      @map("reservation_id") @db.Uuid
+  orderId       String?      @map("order_id") @db.Uuid
+  reservedUntil DateTime?    @map("reserved_until") @db.Timestamptz(3)
+  paidAt        DateTime?    @map("paid_at") @db.Timestamptz(3)
+  blockedReason String?      @map("blocked_reason")
+  version       Int          @default(0)
+  updatedAt     DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  campaign    Campaign     @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+  reservation Reservation? @relation(fields: [reservationId], references: [id], onDelete: Restrict)
+  order       Order?       @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  orderItems  OrderItem[]
+  drawResults DrawResult[]
+
+  @@unique([campaignId, number])
+  @@index([campaignId, status])
+  @@index([orderId])
+  @@index([reservationId])
+  @@index([status, reservedUntil])
+  @@map("campaign_numbers")
+}
+
+model Prize {
+  id                  String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaignId          String      @map("campaign_id") @db.Uuid
+  position            Int
+  name                String
+  description         String?
+  imageUrl            String?     @map("image_url")
+  estimatedValueCents Int?        @map("estimated_value_cents")
+  /// Origem só é "doação" se o administrador registrar explicitamente.
+  origin              PrizeOrigin @default(NOT_INFORMED)
+  originDetails       String?     @map("origin_details")
+  documentationUrl    String?     @map("documentation_url")
+  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt           DateTime?   @map("deleted_at") @db.Timestamptz(3)
+
+  campaign    Campaign     @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+  drawResults DrawResult[]
+
+  @@index([campaignId])
+  @@map("prizes")
+}
+
+model LegalInformation {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaignId          String    @unique @map("campaign_id") @db.Uuid
+  /// Responsável pela operação
+  operatorName        String?   @map("operator_name")
+  /// Entidade responsável
+  entityName          String?   @map("entity_name")
+  cnpj                String?
+  /// Número de autorização/certificado, quando aplicável
+  authorizationNumber String?   @map("authorization_number")
+  regulation          String?
+  regulationUrl       String?   @map("regulation_url")
+  startDate           DateTime? @map("start_date") @db.Timestamptz(3)
+  endDate             DateTime? @map("end_date") @db.Timestamptz(3)
+  modality            String?
+  /// Método oficial de apuração (texto do regulamento)
+  officialDrawMethod  String?   @map("official_draw_method")
+  additionalInfo      String?   @map("additional_info")
+  privacyContact      String?   @map("privacy_contact")
+  showOnPublicPage    Boolean   @default(true) @map("show_on_public_page")
+  updatedById         String?   @map("updated_by_id") @db.Uuid
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+
+  @@map("legal_information")
+}
+
+model PaymentSettings {
+  id                     String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaignId             String             @unique @map("campaign_id") @db.Uuid
+  mode                   PaymentMode        @default(MANUAL)
+  pixKeyType             PixKeyType         @map("pix_key_type")
+  pixKey                 String             @map("pix_key")
+  receiverName           String             @map("receiver_name")
+  receiverCity           String             @map("receiver_city")
+  gateway                PaymentGateway?
+  environment            GatewayEnvironment @default(SANDBOX)
+  /// Access token criptografado (AES-256-GCM). Nunca retornado à interface.
+  apiKeyEncrypted        String?            @map("api_key_encrypted")
+  apiKeyHint             String?            @map("api_key_hint")
+  /// Segredo de assinatura do webhook criptografado.
+  webhookSecretEncrypted String?            @map("webhook_secret_encrypted")
+  webhookSecretHint      String?            @map("webhook_secret_hint")
+  webhookEnabled         Boolean            @default(true) @map("webhook_enabled")
+  updatedById            String?            @map("updated_by_id") @db.Uuid
+  version                Int                @default(1)
+  createdAt              DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt              DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+
+  @@map("payment_settings")
+}
+
+// ---------------------------------------------------------------------
+// Reservas, clientes e pedidos
+// ---------------------------------------------------------------------
+
+model Reservation {
+  id         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaignId String            @map("campaign_id") @db.Uuid
+  /// SHA-256 do token entregue ao navegador.
+  tokenHash  String            @unique @map("token_hash")
+  status     ReservationStatus @default(ACTIVE)
+  quantity   Int
+  expiresAt  DateTime          @map("expires_at") @db.Timestamptz(3)
+  orderId    String?           @unique @map("order_id") @db.Uuid
+  ipHash     String?           @map("ip_hash")
+  createdAt  DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  campaign         Campaign         @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+  numbers          CampaignNumber[]
+  convertedToOrder Order?           @relation("ReservationConvertedTo", fields: [orderId], references: [id], onDelete: Restrict)
+  orderFrom        Order?           @relation("OrderFromReservation")
+
+  @@index([status, expiresAt])
+  @@index([campaignId])
+  @@map("reservations")
+}
+
+model Customer {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  /// Somente dígitos, com DDI (ex.: 5541999998888).
+  phone        String
+  email        String?
+  /// CPF criptografado (AES-256-GCM), apenas se a campanha exigir.
+  cpfEncrypted String?   @map("cpf_encrypted")
+  /// HMAC do CPF para busca sem descriptografar.
+  cpfHash      String?   @map("cpf_hash")
+  anonymizedAt DateTime? @map("anonymized_at") @db.Timestamptz(3)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  orders Order[]
+
+  @@index([phone])
+  @@index([cpfHash])
+  @@index([name])
+  @@map("customers")
+}
+
+model Order {
+  id                     String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Ex.: ALEK-20260928-000001 (sequencial; nunca usado sozinho como credencial).
+  code                   String         @unique
+  campaignId             String         @map("campaign_id") @db.Uuid
+  customerId             String         @map("customer_id") @db.Uuid
+  status                 OrderStatus    @default(PENDING_PAYMENT)
+  paymentMode            PaymentMode    @map("payment_mode")
+  gateway                PaymentGateway
+  quantity               Int
+  /// Preço oficial copiado do banco no momento da compra.
+  unitPriceCents         Int            @map("unit_price_cents")
+  totalCents             Int            @map("total_cents")
+  currency               String         @default("BRL") @db.Char(3)
+  /// Cópia dos dados do comprador no momento da compra.
+  customerName           String         @map("customer_name")
+  customerPhone          String         @map("customer_phone")
+  customerEmail          String?        @map("customer_email")
+  /// SHA-256 do token de acesso do link do pedido.
+  accessTokenHash        String         @unique @map("access_token_hash")
+  idempotencyKey         String         @unique @map("idempotency_key")
+  reservationId          String?        @unique @map("reservation_id") @db.Uuid
+  expiresAt              DateTime       @map("expires_at") @db.Timestamptz(3)
+  paidAt                 DateTime?      @map("paid_at") @db.Timestamptz(3)
+  paidPaymentId          String?        @unique @map("paid_payment_id") @db.Uuid
+  expiredAt              DateTime?      @map("expired_at") @db.Timestamptz(3)
+  cancelledAt            DateTime?      @map("cancelled_at") @db.Timestamptz(3)
+  cancelReason           String?        @map("cancel_reason")
+  refundedAt             DateTime?      @map("refunded_at") @db.Timestamptz(3)
+  customerReportedPaidAt DateTime?      @map("customer_reported_paid_at") @db.Timestamptz(3)
+  customerPaymentNote    String?        @map("customer_payment_note")
+  termsAcceptedAt        DateTime       @map("terms_accepted_at") @db.Timestamptz(3)
+  privacyAcceptedAt      DateTime       @map("privacy_accepted_at") @db.Timestamptz(3)
+  termsVersion           String         @map("terms_version")
+  source                 String         @default("WEB")
+  createdByUserId        String?        @map("created_by_user_id") @db.Uuid
+  ipHash                 String?        @map("ip_hash")
+  lastStatusCheckAt      DateTime?      @map("last_status_check_at") @db.Timestamptz(3)
+  confirmationSentAt     DateTime?      @map("confirmation_sent_at") @db.Timestamptz(3)
+  version                Int            @default(0)
+  createdAt              DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt              DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  campaign        Campaign         @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+  customer        Customer         @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  items           OrderItem[]
+  payments        Payment[]        @relation("OrderPayments")
+  paidPayment     Payment?         @relation("OrderPaidPayment", fields: [paidPaymentId], references: [id], onDelete: Restrict)
+  numbers         CampaignNumber[]
+  notes           OrderNote[]
+  reservation     Reservation?     @relation("OrderFromReservation", fields: [reservationId], references: [id], onDelete: Restrict)
+  reservationConv Reservation?     @relation("ReservationConvertedTo")
+  createdBy       User?            @relation("OrderCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  paymentEvents   PaymentEvent[]
+  drawResults     DrawResult[]
+
+  @@index([campaignId, status])
+  @@index([customerId])
+  @@index([status, expiresAt])
+  @@index([customerPhone])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId          String    @map("order_id") @db.Uuid
+  campaignNumberId String    @map("campaign_number_id") @db.Uuid
+  campaignId       String    @map("campaign_id") @db.Uuid
+  number           Int
+  unitPriceCents   Int       @map("unit_price_cents")
+  /// false quando o pedido expira/cancela e o número é devolvido.
+  active           Boolean   @default(true)
+  releasedAt       DateTime? @map("released_at") @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  order          Order          @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  campaignNumber CampaignNumber @relation(fields: [campaignNumberId], references: [id], onDelete: Restrict)
+  campaign       Campaign       @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+
+  @@unique([orderId, campaignNumberId])
+  @@index([campaignNumberId])
+  @@index([campaignId, number])
+  @@map("order_items")
+}
+
+model OrderNote {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId   String   @map("order_id") @db.Uuid
+  authorId  String   @map("author_id") @db.Uuid
+  body      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  order  Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  author User  @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@map("order_notes")
+}
+
+// ---------------------------------------------------------------------
+// Pagamentos
+// ---------------------------------------------------------------------
+
+model Payment {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId             String              @map("order_id") @db.Uuid
+  gateway             PaymentGateway
+  mode                PaymentMode
+  status              PaymentStatus
+  /// Identificador da cobrança no gateway (único por gateway).
+  gatewayPaymentId    String?             @map("gateway_payment_id")
+  idempotencyKey      String              @unique @map("idempotency_key")
+  /// Valor esperado (centavos).
+  amountCents         Int                 @map("amount_cents")
+  /// Valor efetivamente pago informado pelo gateway/conferido pelo admin.
+  paidAmountCents     Int?                @map("paid_amount_cents")
+  currency            String              @default("BRL") @db.Char(3)
+  pixCopyPaste        String?             @map("pix_copy_paste")
+  ticketUrl           String?             @map("ticket_url")
+  expiresAt           DateTime?           @map("expires_at") @db.Timestamptz(3)
+  approvedAt          DateTime?           @map("approved_at") @db.Timestamptz(3)
+  gatewayStatus       String?             @map("gateway_status")
+  gatewayStatusDetail String?             @map("gateway_status_detail")
+  lastCheckedAt       DateTime?           @map("last_checked_at") @db.Timestamptz(3)
+  checkCount          Int                 @default(0) @map("check_count")
+  creationAttempts    Int                 @default(0) @map("creation_attempts")
+  creationStartedAt   DateTime?           @map("creation_started_at") @db.Timestamptz(3)
+  lastError           String?             @map("last_error")
+  confirmationSource  PaymentEventSource? @map("confirmation_source")
+  confirmedById       String?             @map("confirmed_by_id") @db.Uuid
+  manualReference     String?             @map("manual_reference")
+  /// Pagamentos que exigem tratamento administrativo (valor divergente,
+  /// duplicidade, pagamento tardio sem números disponíveis...).
+  requiresAttention   Boolean             @default(false) @map("requires_attention")
+  attentionReason     String?             @map("attention_reason")
+  resolvedAt          DateTime?           @map("resolved_at") @db.Timestamptz(3)
+  resolvedById        String?             @map("resolved_by_id") @db.Uuid
+  resolutionNotes     String?             @map("resolution_notes")
+  createdAt           DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  order       Order          @relation("OrderPayments", fields: [orderId], references: [id], onDelete: Restrict)
+  paidOrder   Order?         @relation("OrderPaidPayment")
+  events      PaymentEvent[]
+  confirmedBy User?          @relation("PaymentConfirmedBy", fields: [confirmedById], references: [id], onDelete: Restrict)
+  resolvedBy  User?          @relation("PaymentResolvedBy", fields: [resolvedById], references: [id], onDelete: Restrict)
+
+  @@unique([gateway, gatewayPaymentId])
+  @@index([orderId])
+  @@index([status])
+  @@index([requiresAttention])
+  @@map("payments")
+}
+
+model PaymentEvent {
+  id               String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  paymentId        String?               @map("payment_id") @db.Uuid
+  orderId          String?               @map("order_id") @db.Uuid
+  gateway          PaymentGateway?
+  source           PaymentEventSource
+  type             String
+  /// Chave de deduplicação (ex.: id da notificação do gateway).
+  dedupeKey        String?               @unique @map("dedupe_key")
+  externalId       String?               @map("external_id")
+  processingStatus EventProcessingStatus @map("processing_status")
+  signatureValid   Boolean?              @map("signature_valid")
+  payload          Json?
+  error            String?
+  createdAt        DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  processedAt      DateTime?             @map("processed_at") @db.Timestamptz(3)
+
+  payment Payment? @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  order   Order?   @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@index([paymentId])
+  @@index([orderId])
+  @@index([type])
+  @@index([externalId])
+  @@index([createdAt])
+  @@map("payment_events")
+}
+
+// ---------------------------------------------------------------------
+// Sorteio
+// ---------------------------------------------------------------------
+
+model Draw {
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaignId    String     @unique @map("campaign_id") @db.Uuid
+  status        DrawStatus @default(SNAPSHOT_CREATED)
+  method        DrawMethod
+  methodParams  Json       @map("method_params")
+  createdById   String     @map("created_by_id") @db.Uuid
+  executedById  String?    @map("executed_by_id") @db.Uuid
+  finalizedById String?    @map("finalized_by_id") @db.Uuid
+  createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  executedAt    DateTime?  @map("executed_at") @db.Timestamptz(3)
+  finalizedAt   DateTime?  @map("finalized_at") @db.Timestamptz(3)
+  failedAt      DateTime?  @map("failed_at") @db.Timestamptz(3)
+  failureReason String?    @map("failure_reason")
+
+  campaign    Campaign      @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+  snapshot    DrawSnapshot?
+  results     DrawResult[]
+  createdBy   User          @relation("DrawCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  executedBy  User?         @relation("DrawExecutedBy", fields: [executedById], references: [id], onDelete: Restrict)
+  finalizedBy User?         @relation("DrawFinalizedBy", fields: [finalizedById], references: [id], onDelete: Restrict)
+
+  @@map("draws")
+}
+
+model DrawSnapshot {
+  id                        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  drawId                    String     @unique @map("draw_id") @db.Uuid
+  campaignId                String     @map("campaign_id") @db.Uuid
+  createdAt                 DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  eligibleNumbersCount      Int        @map("eligible_numbers_count")
+  eligibleNumbersHash       String     @map("eligible_numbers_hash")
+  /// Lista ordenada dos números elegíveis (pagos) no congelamento.
+  eligibleNumbers           Int[]      @map("eligible_numbers")
+  numberDigits              Int        @map("number_digits")
+  hashAlgorithm             String     @default("SHA-256") @map("hash_algorithm")
+  canonicalFormat           String     @map("canonical_format")
+  officialMethod            DrawMethod @map("official_method")
+  officialMethodDescription String     @map("official_method_description")
+  /// Referência oficial definida ANTES do resultado (ex.: concurso da Loteria Federal).
+  officialReference         String     @map("official_reference")
+  /// Preenchidos uma única vez na execução (trigger impede alteração).
+  result                    Json?
+  winnerNumber              Int?       @map("winner_number")
+  executedAt                DateTime?  @map("executed_at") @db.Timestamptz(3)
+
+  draw     Draw     @relation(fields: [drawId], references: [id], onDelete: Restrict)
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+
+  @@map("draw_snapshots")
+}
+
+model DrawResult {
+  id                    String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  drawId                String         @map("draw_id") @db.Uuid
+  prizeId               String         @map("prize_id") @db.Uuid
+  prizePosition         Int            @map("prize_position")
+  /// Entrada do método (ex.: 1º prêmio da Loteria Federal).
+  inputValue            String         @map("input_value")
+  /// Número derivado antes da regra de número não elegível.
+  derivedNumber         Int?           @map("derived_number")
+  winnerNumber          Int            @map("winner_number")
+  campaignNumberId      String         @map("campaign_number_id") @db.Uuid
+  orderId               String         @map("order_id") @db.Uuid
+  computation           Json
+  eligibilityVerifiedAt DateTime?      @map("eligibility_verified_at") @db.Timestamptz(3)
+  createdAt             DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  deliveryStatus        DeliveryStatus @default(PENDING_CONTACT) @map("delivery_status")
+  deliveryNotes         String?        @map("delivery_notes")
+  contactedAt           DateTime?      @map("contacted_at") @db.Timestamptz(3)
+  deliveredAt           DateTime?      @map("delivered_at") @db.Timestamptz(3)
+  deliveryProofUrl      String?        @map("delivery_proof_url")
+  deliveryUpdatedAt     DateTime?      @map("delivery_updated_at") @db.Timestamptz(3)
+  deliveryUpdatedById   String?        @map("delivery_updated_by_id") @db.Uuid
+
+  draw           Draw           @relation(fields: [drawId], references: [id], onDelete: Restrict)
+  prize          Prize          @relation(fields: [prizeId], references: [id], onDelete: Restrict)
+  campaignNumber CampaignNumber @relation(fields: [campaignNumberId], references: [id], onDelete: Restrict)
+  order          Order          @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@unique([drawId, prizeId])
+  @@unique([drawId, winnerNumber])
+  @@map("draw_results")
+}
+
+// ---------------------------------------------------------------------
+// Auditoria e observabilidade
+// ---------------------------------------------------------------------
+
+model AuditLog {
+  /// Atribuído pelo trigger (sequência) na ordem da cadeia de hash.
+  id         BigInt    @id @default(autoincrement())
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  actorType  ActorType @map("actor_type")
+  actorId    String?   @map("actor_id") @db.Uuid
+  actorLabel String    @map("actor_label")
+  action     String
+  entityType String    @map("entity_type")
+  entityId   String?   @map("entity_id")
+  campaignId String?   @map("campaign_id") @db.Uuid
+  before     Json?
+  after      Json?
+  reason     String?
+  ip         String?
+  userAgent  String?   @map("user_agent")
+  /// Preenchidos pelo trigger: encadeamento SHA-256 (evidência de adulteração).
+  prevHash   String?   @map("prev_hash")
+  hash       String    @default("")
+
+  @@index([createdAt])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([campaignId])
+  @@map("audit_logs")
+}
+
+model SystemLog {
+  id        BigInt   @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  level     LogLevel
+  category  String
+  message   String
+  context   Json?
+  requestId String?  @map("request_id")
+
+  @@index([createdAt])
+  @@index([level, createdAt])
+  @@index([category, createdAt])
+  @@map("system_logs")
+}
+
+model RateLimit {
+  key         String
+  windowStart DateTime @map("window_start") @db.Timestamptz(3)
+  count       Int
+
+  @@id([key, windowStart])
+  @@index([windowStart])
+  @@map("rate_limits")
+}
+
+model SystemState {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("system_state")
+}
