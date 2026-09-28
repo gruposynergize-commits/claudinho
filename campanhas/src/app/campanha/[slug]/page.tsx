@@ -109,7 +109,22 @@ export default async function CampaignPage({ params }: Props) {
         </div>
       </section>
 
-      {draw && (
+      {draw && draw.results.length === 0 && (
+        <section aria-labelledby="congelada" className="card mt-6 border-brand-200 bg-brand-50">
+          <h2 id="congelada" className="text-xl font-bold">Lista de participantes congelada</h2>
+          <p className="mt-2 text-stone-700">
+            {draw.eligibleCount.toLocaleString("pt-BR")} números pagos participam. A lista foi congelada em {formatDateTime(draw.frozenAt)} e publicada com
+            uma impressão digital (hash SHA-256) antes do resultado oficial.
+          </p>
+          <p className="mt-2 break-all font-mono text-xs text-stone-600">{draw.hash}</p>
+          <p className="mt-2 text-sm text-stone-700">Referência oficial: {draw.officialReference}</p>
+          <Link href={`/campanha/${campaign.slug}/resultado`} className="mt-3 inline-block font-semibold text-brand-700 underline">
+            Como conferir a lista e o sorteio
+          </Link>
+        </section>
+      )}
+
+      {draw && draw.results.length > 0 && (
         <section aria-labelledby="resultado" className="card mt-6 border-brand-200 bg-brand-50">
           <h2 id="resultado" className="text-xl font-bold">Resultado do sorteio</h2>
           <ul className="mt-3 space-y-2">

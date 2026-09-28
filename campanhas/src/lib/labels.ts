@@ -56,6 +56,13 @@ export const DRAW_METHOD_LABEL: Record<string, string> = {
   CSPRNG: "Sorteio eletrônico com gerador criptográfico",
 };
 
+export const DRAW_STATUS_LABEL: Record<string, string> = {
+  SNAPSHOT_CREATED: "Lista congelada — aguardando apuração",
+  EXECUTED: "Apurado — aguardando homologação",
+  FINALIZED: "Homologado",
+  FAILED: "Anulado",
+};
+
 export const DELIVERY_STATUS_LABEL: Record<string, string> = {
   PENDING_CONTACT: "Aguardando contato",
   CONTACTED: "Contatado",

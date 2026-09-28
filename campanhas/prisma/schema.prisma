@@ -298,7 +298,7 @@ model Campaign {
   reservations    Reservation[]
   legalInfo       LegalInformation?
   paymentSettings PaymentSettings?
-  draw            Draw?
+  draws           Draw[]
   drawSnapshots   DrawSnapshot[]
 
   @@index([status])
@@ -647,9 +647,11 @@ model PaymentEvent {
 // Sorteio
 // ---------------------------------------------------------------------
 
+/// Um sorteio "vivo" por campanha (índice parcial em SQL: status <> FAILED);
+/// sorteios anulados permanecem no histórico.
 model Draw {
   id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  campaignId    String     @unique @map("campaign_id") @db.Uuid
+  campaignId    String     @map("campaign_id") @db.Uuid
   status        DrawStatus @default(SNAPSHOT_CREATED)
   method        DrawMethod
   methodParams  Json       @map("method_params")
@@ -669,6 +671,7 @@ model Draw {
   executedBy  User?         @relation("DrawExecutedBy", fields: [executedById], references: [id], onDelete: Restrict)
   finalizedBy User?         @relation("DrawFinalizedBy", fields: [finalizedById], references: [id], onDelete: Restrict)
 
+  @@index([campaignId])
   @@map("draws")
 }
 

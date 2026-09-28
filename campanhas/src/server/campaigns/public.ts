@@ -30,8 +30,9 @@ export async function getPublicCampaignPage(slug: string, opts: { preview?: bool
     getNumberCounts(campaign.id),
     db().prize.findMany({ where: { campaignId: campaign.id, deletedAt: null }, orderBy: { position: "asc" } }),
     db().legalInformation.findUnique({ where: { campaignId: campaign.id } }),
-    db().draw.findUnique({
-      where: { campaignId: campaign.id },
+    // Sorteio "vivo" (anulados ficam só no histórico da página de resultado).
+    db().draw.findFirst({
+      where: { campaignId: campaign.id, status: { not: "FAILED" } },
       include: {
         snapshot: { select: { eligibleNumbersCount: true, eligibleNumbersHash: true, officialReference: true, createdAt: true } },
         results: { select: { prizePosition: true, winnerNumber: true, prizeId: true }, orderBy: { prizePosition: "asc" } },
@@ -88,16 +89,22 @@ export async function getPublicCampaignPage(slug: string, opts: { preview?: bool
             privacyContact: legal.privacyContact,
           }
         : null,
-    draw:
-      draw && draw.status === "FINALIZED"
-        ? {
-            finalizedAt: draw.finalizedAt?.toISOString() ?? null,
-            eligibleCount: draw.snapshot?.eligibleNumbersCount ?? 0,
-            hash: draw.snapshot?.eligibleNumbersHash ?? "",
-            officialReference: draw.snapshot?.officialReference ?? "",
-            results: draw.results.map((r) => ({ position: r.prizePosition, winnerNumber: r.winnerNumber, prizeId: r.prizeId })),
-          }
-        : null,
+    // O hash da lista congelada é público desde o congelamento (antes do
+    // resultado existir); os vencedores aparecem após a homologação.
+    draw: draw?.snapshot
+      ? {
+          status: draw.status,
+          frozenAt: draw.snapshot.createdAt.toISOString(),
+          finalizedAt: draw.finalizedAt?.toISOString() ?? null,
+          eligibleCount: draw.snapshot.eligibleNumbersCount,
+          hash: draw.snapshot.eligibleNumbersHash,
+          officialReference: draw.snapshot.officialReference,
+          results:
+            draw.status === "FINALIZED"
+              ? draw.results.map((r) => ({ position: r.prizePosition, winnerNumber: r.winnerNumber, prizeId: r.prizeId }))
+              : [],
+        }
+      : null,
   };
 }
 
