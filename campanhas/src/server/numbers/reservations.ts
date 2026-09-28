@@ -1,4 +1,6 @@
 import "server-only";
+import { logEvent } from "../logger";
+import { env } from "../env";
 import type { CampaignStatus, ReservationStatus } from "@/generated/prisma/client";
 import { formatNumber } from "@/lib/format";
 import { multiplyCents } from "@/lib/money";
@@ -133,6 +135,35 @@ export async function reserveNumbers(input: {
         await releaseReservationTx(tx, sha256Hex(input.replaceToken), "RELEASED");
       }
       await releaseExpiredCartHolds(tx, campaign.id, numbers);
+
+      // Anti-retenção: um mesmo IP não segura boa parte da campanha (reservas
+      // ativas + pedidos aguardando pagamento). O teto é generoso porque
+      // operadoras móveis compartilham um IP entre muitos clientes (CGNAT).
+      if (input.ipHash) {
+        const cap = env().MAX_HELD_NUMBERS_PER_IP;
+        // Serializa reservas do mesmo IP nesta campanha: requisições paralelas
+        // não conseguem passar do teto juntas.
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`hold:${campaign.id}:${input.ipHash}`}, 0))`;
+        const [held] = await tx.$queryRaw<{ n: number }[]>`
+          SELECT (
+            (SELECT coalesce(sum(quantity), 0) FROM reservations
+              WHERE campaign_id = ${campaign.id}::uuid AND ip_hash = ${input.ipHash} AND status = 'ACTIVE' AND expires_at > now())
+          + (SELECT coalesce(sum(quantity), 0) FROM orders
+              WHERE campaign_id = ${campaign.id}::uuid AND ip_hash = ${input.ipHash} AND status = 'PENDING_PAYMENT')
+          )::int AS n`;
+        if ((held?.n ?? 0) + numbers.length > cap) {
+          await logEvent("WARN", "SECURITY", "Limite de números retidos por IP atingido", {
+            campaign: campaign.slug,
+            held: held?.n ?? 0,
+            requested: numbers.length,
+            cap,
+          });
+          throw new AppError(
+            "LIMIT_EXCEEDED",
+            "Há muitos números reservados a partir da sua conexão. Conclua ou cancele uma reserva antes de escolher mais.",
+          );
+        }
+      }
 
       const [res] = await tx.$queryRaw<{ id: string; expires_at: Date }[]>`
         INSERT INTO reservations (campaign_id, token_hash, status, quantity, expires_at, ip_hash)

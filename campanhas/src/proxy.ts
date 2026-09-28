@@ -28,7 +28,9 @@ export function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const restricted = (pathname.startsWith("/admin") && pathname !== "/admin/login") || pathname === "/status";
-  if (restricted && !request.cookies.has(sessionCookieName())) {
+  // Redirecionamento rápido só com a presença do cookie (qualquer um dos dois
+  // nomes); a validação real da sessão e da permissão acontece no servidor.
+  if (restricted && !request.cookies.has("__Host-campanhas_session") && !request.cookies.has("campanhas_session")) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     url.search = `?next=${encodeURIComponent(pathname)}`;
@@ -41,10 +43,6 @@ export function proxy(request: NextRequest) {
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", csp);
   return response;
-}
-
-function sessionCookieName(): string {
-  return (process.env.NEXT_PUBLIC_APP_URL ?? "").startsWith("https://") ? "__Host-campanhas_session" : "campanhas_session";
 }
 
 export const config = {

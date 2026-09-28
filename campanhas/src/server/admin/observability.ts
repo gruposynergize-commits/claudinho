@@ -4,6 +4,7 @@ import type { LogLevel, Prisma } from "@/generated/prisma/client";
 import { db } from "../db";
 import { getStates } from "../system-state";
 import { resolveGatewayCredentials } from "../payments/settings";
+import { env } from "../env";
 
 export type AuditFilters = { action?: string; entityType?: string; actor?: string; from?: Date; to?: Date; page?: number };
 
@@ -108,6 +109,9 @@ export async function getSystemStatus() {
   if (reconcileAge === null || reconcileAge > 10) warnings.push("Conciliação sem execução recente (worker/cron parado?)");
   if (gateways.some((g) => g.mode === "AUTOMATIC" && !g.configured)) warnings.push("Campanha no modo automático sem credenciais do gateway");
   if (attention > 0) warnings.push(`${attention} pagamento(s) aguardando tratamento administrativo`);
+  if (process.env.NODE_ENV === "production" && env().TRUST_PROXY_HOPS === 0) {
+    warnings.push("TRUST_PROXY_HOPS=0 em produção: rode atrás de um proxy HTTPS e use 1 (limites por IP ficam imprecisos)");
+  }
 
   return {
     overall: !dbOk ? "DOWN" : warnings.length > 0 ? "DEGRADED" : "OPERATIONAL",

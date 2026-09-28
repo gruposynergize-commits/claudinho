@@ -44,6 +44,8 @@ export default defineConfig({
     { name: "iphone", use: { ...devices["iPhone 13"], browserName: "chromium" }, testMatch: /public\.spec\.ts/ },
     { name: "android", use: { ...devices["Pixel 7"] }, testMatch: /public\.spec\.ts/ },
     { name: "desktop", use: { ...devices["Desktop Chrome"] }, testMatch: /(admin|automatic|draw|concurrency)\.spec\.ts/ },
+    // Safari real (WebKit): E2E_WEBKIT=1 npm run test:e2e (requer `npx playwright install webkit`).
+    ...(process.env.E2E_WEBKIT ? [{ name: "iphone-safari", use: { ...devices["iPhone 13"] }, testMatch: /public\.spec\.ts/ }] : []),
   ],
   webServer: [
     {

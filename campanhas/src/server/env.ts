@@ -22,6 +22,8 @@ const schema = z.object({
   /** Quantos proxies confiáveis (que anexam/definem X-Forwarded-For) ficam à frente da aplicação. */
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
   CRON_SECRET: optionalString,
+  /** Máximo de números retidos ao mesmo tempo (reservas + pedidos pendentes) por IP, por campanha. */
+  MAX_HELD_NUMBERS_PER_IP: z.coerce.number().int().min(10).max(1_000_000).default(300),
   PAYMENT_GATEWAY: optionalString.pipe(z.enum(["mercadopago"]).optional()),
   PAYMENT_API_KEY: optionalString,
   PAYMENT_WEBHOOK_SECRET: optionalString,

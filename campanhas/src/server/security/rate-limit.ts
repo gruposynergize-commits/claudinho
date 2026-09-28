@@ -24,14 +24,20 @@ export async function hitRateLimit(
   return { allowed: count <= limit, count, retryAfter: Number(row?.retry_after ?? windowSeconds) };
 }
 
+/**
+ * Limites por IP (salvo indicação). Operadoras móveis colocam muitos clientes
+ * atrás do mesmo IP (CGNAT): os limites públicos são folgados para não barrar
+ * compradores reais; a proteção contra retenção de números é o teto de
+ * números retidos por IP (MAX_HELD_NUMBERS_PER_IP) e a expiração das reservas.
+ */
 export const RATE_LIMITS = {
   login: { limit: 10, windowSeconds: 900 },
   loginEmail: { limit: 8, windowSeconds: 900 },
-  reservation: { limit: 20, windowSeconds: 600 },
-  order: { limit: 12, windowSeconds: 600 },
-  lookup: { limit: 15, windowSeconds: 600 },
+  reservation: { limit: 60, windowSeconds: 600 },
+  order: { limit: 30, windowSeconds: 600 },
+  lookup: { limit: 30, windowSeconds: 600 },
   lookupCode: { limit: 8, windowSeconds: 600 },
-  orderStatus: { limit: 120, windowSeconds: 60 },
+  orderStatus: { limit: 600, windowSeconds: 60 },
   webhook: { limit: 600, windowSeconds: 60 },
   publicRead: { limit: 300, windowSeconds: 60 },
   adminMutation: { limit: 120, windowSeconds: 60 },

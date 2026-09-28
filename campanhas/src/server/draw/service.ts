@@ -415,6 +415,11 @@ export async function finalizeDraw(drawId: string, input: { confirmFinalize: boo
       await tx.$queryRaw`SELECT id FROM draws WHERE id = ${drawId}::uuid FOR UPDATE`;
       const draw = await loadDraw(tx, drawId);
       if (draw.status !== "EXECUTED") throw new AppError("INVALID_STATE", "Só um sorteio apurado (e não anulado) pode ser homologado.");
+      // A lista gravada precisa continuar batendo com o hash publicado no congelamento.
+      if (eligibleHash(draw.snapshot.eligibleNumbers, draw.snapshot.numberDigits) !== draw.snapshot.eligibleNumbersHash) {
+        await logEvent("CRITICAL", "DRAW", "Hash do snapshot não confere na homologação", { drawId });
+        throw new AppError("INVALID_STATE", "A lista congelada não confere com o hash publicado. Homologação bloqueada.");
+      }
       await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${draw.campaignId}::uuid FOR UPDATE`;
       const results = await tx.drawResult.findMany({
         where: { drawId },

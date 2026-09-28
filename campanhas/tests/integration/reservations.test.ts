@@ -1,6 +1,7 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { db, disconnectDb } from "@/server/db";
 import { AppError } from "@/server/errors";
+import { resetEnvCache } from "@/server/env";
 import {
   expireCartReservations,
   getReservationByToken,
@@ -172,5 +173,49 @@ describe("CONCORRÊNCIA (obrigatório)", () => {
     for (const res of reservations) {
       expect(reserved.filter((n) => n.reservationId === res.id).length).toBe(res.quantity);
     }
+  });
+});
+
+describe("anti-retenção: números retidos por IP", () => {
+  async function withCap<T>(cap: number, fn: () => Promise<T>): Promise<T> {
+    process.env.MAX_HELD_NUMBERS_PER_IP = String(cap);
+    resetEnvCache();
+    try {
+      return await fn();
+    } finally {
+      delete process.env.MAX_HELD_NUMBERS_PER_IP;
+      resetEnvCache();
+    }
+  }
+
+  it("um IP não retém mais que o teto; outros IPs e a troca de seleção continuam funcionando", async () => {
+    const c = await createCampaign({ totalNumbers: 100 });
+    await withCap(10, async () => {
+      const first = await reserveNumbers({ campaignSlug: c.slug, numbers: [1, 2, 3, 4, 5, 6], ipHash: "ip-a" });
+      await expect(reserveNumbers({ campaignSlug: c.slug, numbers: [7, 8, 9, 10, 11], ipHash: "ip-a" })).rejects.toMatchObject({
+        code: "LIMIT_EXCEEDED",
+      });
+      // Outro IP não é afetado.
+      await reserveNumbers({ campaignSlug: c.slug, numbers: [20, 21, 22, 23, 24], ipHash: "ip-b" });
+      // Trocar a seleção libera a anterior antes de contar.
+      await reserveNumbers({ campaignSlug: c.slug, numbers: [30, 31, 32, 33, 34, 35, 36, 37, 38], ipHash: "ip-a", replaceToken: first.token });
+      const held = await db().campaignNumber.count({ where: { campaignId: c.id, status: "RESERVED" } });
+      expect(held).toBe(14);
+    });
+    await assertGlobalInvariants(c.id);
+  });
+
+  it("requisições paralelas do mesmo IP não ultrapassam o teto juntas", async () => {
+    const c = await createCampaign({ totalNumbers: 100 });
+    await withCap(10, async () => {
+      const results = await Promise.allSettled(
+        Array.from({ length: 10 }, (_, i) => reserveNumbers({ campaignSlug: c.slug, numbers: [i * 3 + 1, i * 3 + 2, i * 3 + 3], ipHash: "ip-paralelo" })),
+      );
+      expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(3);
+      for (const r of results) {
+        if (r.status === "rejected") expect((r.reason as AppError).code).toBe("LIMIT_EXCEEDED");
+      }
+      expect(await db().campaignNumber.count({ where: { campaignId: c.id, status: "RESERVED" } })).toBe(9);
+    });
   });
 });

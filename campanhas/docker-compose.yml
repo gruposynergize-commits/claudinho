@@ -1,0 +1,72 @@
+# Produção em uma VPS: PostgreSQL + aplicação + worker + Caddy (HTTPS).
+#   cp .env.example .env   # e preencha
+#   docker compose up -d db
+#   docker compose run --rm tools npx prisma migrate deploy
+#   docker compose run --rm tools npm run db:seed
+#   docker compose run --rm tools npm run create-admin -- --email=voce@exemplo.org --name="Seu Nome"
+#   docker compose up -d
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: campanhas
+      POSTGRES_USER: campanhas
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campanhas -d campanhas"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: { context: ., target: app }
+    restart: unless-stopped
+    init: true
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://campanhas:${POSTGRES_PASSWORD}@db:5432/campanhas
+      TRUST_PROXY_HOPS: "1"
+    depends_on:
+      db: { condition: service_healthy }
+
+  worker:
+    build: { context: ., target: tools }
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://campanhas:${POSTGRES_PASSWORD}@db:5432/campanhas
+    depends_on:
+      db: { condition: service_healthy }
+
+  # Uso pontual: migrações, seed, criação de administrador.
+  tools:
+    build: { context: ., target: tools }
+    profiles: ["tools"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://campanhas:${POSTGRES_PASSWORD}@db:5432/campanhas
+    depends_on:
+      db: { condition: service_healthy }
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN:?defina DOMAIN no .env}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [app]
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

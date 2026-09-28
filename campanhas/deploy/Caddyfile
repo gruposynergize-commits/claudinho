@@ -1,0 +1,9 @@
+# HTTPS automático (Let's Encrypt) na frente da aplicação.
+# A aplicação deve rodar com TRUST_PROXY_HOPS=1 (o Caddy define X-Forwarded-For).
+{$DOMAIN} {
+	encode zstd gzip
+	request_body {
+		max_size 1MB
+	}
+	reverse_proxy app:3000
+}

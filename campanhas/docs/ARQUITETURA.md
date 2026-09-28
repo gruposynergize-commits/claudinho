@@ -95,7 +95,7 @@ Tabelas principais (nomes físicos em snake_case):
 | `payments` | cobranças | `UNIQUE(gateway, gateway_payment_id)`, `UNIQUE(idempotency_key)`, pedido obrigatório |
 | `payment_events` | eventos (webhook, conciliação, manual) | `UNIQUE(dedupe_key)` |
 | `prizes` | prêmios | ordem única por campanha, origem `NOT_INFORMED` por padrão |
-| `draws` | sorteio | um por campanha, trigger de transição |
+| `draws` | sorteio | um sorteio "vivo" por campanha (índice único parcial; anulados ficam no histórico), trigger de transição |
 | `draw_snapshots` | lista congelada + hash | trigger: imutável; campos de resultado só podem ser preenchidos uma vez |
 | `draw_results` | vencedor por prêmio | trigger: número vencedor imutável; `UNIQUE(draw_id, prize_id)` e `UNIQUE(draw_id, winner_number)` |
 | `audit_logs` | auditoria | append-only (trigger bloqueia UPDATE/DELETE) + cadeia de hash |
@@ -208,19 +208,32 @@ declaração explícita do administrador de que a operação está enquadrada.
 ## 10. Sorteio
 
 1. Fechar vendas (`CLOSED`).
-2. Congelar (`FROZEN`): exige zero números `RESERVED/PENDING_PAYMENT`; cria
-   `draw_snapshots` com a lista ordenada de números `PAID`, contagem, SHA-256,
-   método oficial e referência oficial planejada (ex.: concurso da Loteria
-   Federal). Snapshot imutável.
-3. Executar: aplica o método configurado (Loteria Federal com regra
-   documentada, hash verificável com amostragem por rejeição, ou
-   `crypto.randomInt`), grava entrada, passos e resultado; números `PAID →
-   DRAWN`. Execução única (trigger + transição condicional).
-4. Homologar: recalcula o hash da lista gravada, confere elegibilidade de cada
-   número sorteado (no snapshot, pedido pago, pagamento aprovado), move
-   `DRAWN → WINNER`, registra vencedores e gera relatório. Campanha → `DRAWN`.
+2. Congelar (`FROZEN`): exige zero números `RESERVED/PENDING_PAYMENT`, nenhum
+   pedido aguardando pagamento, nenhum pagamento com pendência e método
+   definido. Cria `draws` + `draw_snapshots` com a lista ordenada de números
+   `PAID`, contagem, SHA-256 (formato canônico conferido pelo próprio banco),
+   método, regra descrita e referência oficial. Para Loteria Federal e hash
+   verificável, a data/hora do evento oficial precisa ser **futura** (a lista
+   é publicada antes de o resultado existir). Snapshot imutável. Os prêmios
+   ficam bloqueados para edição.
+3. Apurar (uma única vez; lock no sorteio): Loteria Federal (redução ao
+   intervalo + regra de número não vendido), hash verificável (SHA-256 com
+   amostragem por rejeição) ou `crypto.randomInt`. A entrada oficial é
+   digitada duas vezes e pode ser pré-visualizada sem gravar. Grava entrada,
+   passo a passo e vencedor por prêmio; números `PAID → DRAWN`.
+4. Homologar: confere de novo o hash da lista gravada e a elegibilidade de
+   cada vencedor (no snapshot, número `DRAWN` do mesmo pedido, pedido pago),
+   move `DRAWN → WINNER`, sorteio `FINALIZED`, campanha `DRAWN` (definitivo).
+5. Anulação (somente antes da homologação, com motivo público): referência
+   oficial cancelada/adiada ou resultado oficial digitado errado. Depois da
+   execução só é permitida para métodos de entrada pública — com CSPRNG seria
+   "sortear de novo", então o banco recusa. Os números voltam a `PAID` por
+   uma flag transacional exclusiva e um novo sorteio usa a mesma lista.
 
 Não existe endpoint, formulário ou coluna editável para "digitar o vencedor".
+Página pública `/campanha/{slug}/resultado`: hash, lista para download
+(`sha256sum` confere), regra, entrada oficial, passo a passo, vencedores
+(somente números) e sorteios anulados com o motivo.
 
 ## 11. Segurança
 
