@@ -49,6 +49,8 @@ export type FakeMercadoPagoOptions = {
   /** Para onde enviar webhooks quando a cobrança não tem notification_url. */
   defaultNotificationUrl?: string;
   log?: boolean;
+  /** Primeiro id de pagamento. Padrão: derivado do relógio, para não repetir ids já gravados num banco de desenvolvimento após reiniciar o simulador. */
+  firstId?: number;
 };
 
 export type WebhookRequest = { url: string; headers: Record<string, string>; body: string };
@@ -59,11 +61,13 @@ export class FakeMercadoPago {
   requests: FakeRequestLog[] = [];
   down = false;
   latencyMs = 0;
-  private nextId = 1_000_000_001;
+  private nextId: number;
   private server: Server | null = null;
   url = "";
 
-  constructor(private readonly opts: FakeMercadoPagoOptions) {}
+  constructor(private readonly opts: FakeMercadoPagoOptions) {
+    this.nextId = opts.firstId ?? 1_000_000_000 + (Date.now() % 1_000_000_000);
+  }
 
   async start(): Promise<string> {
     this.server = createServer((req, res) => {
