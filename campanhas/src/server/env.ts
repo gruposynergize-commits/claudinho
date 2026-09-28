@@ -7,11 +7,6 @@ import { z } from "zod";
  * obrigatório estiver ausente.
  */
 
-const booleanish = z
-  .string()
-  .optional()
-  .transform((v) => v === "true" || v === "1");
-
 const optionalString = z
   .string()
   .optional()
@@ -24,7 +19,8 @@ const schema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url("NEXT_PUBLIC_APP_URL deve ser uma URL"),
   AUTH_SECRET: z.string().min(32, "AUTH_SECRET deve ter ao menos 32 caracteres"),
   DATA_ENCRYPTION_KEY: optionalString,
-  TRUST_PROXY: booleanish,
+  /** Quantos proxies confiáveis (que anexam/definem X-Forwarded-For) ficam à frente da aplicação. */
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
   CRON_SECRET: optionalString,
   PAYMENT_GATEWAY: optionalString.pipe(z.enum(["mercadopago"]).optional()),
   PAYMENT_API_KEY: optionalString,

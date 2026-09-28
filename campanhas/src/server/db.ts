@@ -18,7 +18,9 @@ function createClient(): PrismaClient {
     connectionTimeoutMillis: 5_000,
     idleTimeoutMillis: 30_000,
   });
-  return new PrismaClient({ adapter, log: ["error"] });
+  // Sem log interno do Prisma: erros esperados (unique, triggers) são tratados
+  // pela aplicação, e o log automático poderia expor parâmetros (dados pessoais).
+  return new PrismaClient({ adapter, log: [] });
 }
 
 /** Cliente único por processo (reutilizado entre hot reloads em desenvolvimento). */
@@ -39,6 +41,11 @@ export async function disconnectDb(): Promise<void> {
 const RETRYABLE_PG_CODES = new Set(["40001", "40P01"]);
 
 /**
+ * Convenção de locks: linhas que serão alteradas são travadas com
+ * `FOR NO KEY UPDATE` (não conflita com as checagens de chave estrangeira
+ * de inserções que referenciam a linha — evita deadlocks), sempre na ordem
+ * pedido → pagamento → números.
+ *
  * Executa uma transação READ COMMITTED com nova tentativa automática em
  * deadlock/serialização. As funções passadas devem ser idempotentes em
  * relação a efeitos externos (não chamar APIs de terceiros aqui dentro).
