@@ -21,6 +21,8 @@ export type CreateOrderInput = {
   /** Gerada pelo navegador por tentativa de checkout (UUID). */
   idempotencyKey: string;
   ipHash?: string | null;
+  /** Pedido criado pelo painel (ex.: venda presencial): sempre Pix manual. */
+  admin?: { userId: string };
 };
 
 export type CreateOrderResult = {
@@ -140,7 +142,8 @@ export async function createOrderFromReservation(input: CreateOrderInput): Promi
       }
 
       // 4. Configuração de pagamento (modo congelado no pedido).
-      const payment = await getPaymentConfig(campaign.id, tx);
+      const config = await getPaymentConfig(campaign.id, tx);
+      const payment = input.admin ? { ...config, mode: "MANUAL" as const } : config;
       if (payment.mode === "AUTOMATIC" && !payment.gateway) {
         throw new AppError("GATEWAY_NOT_CONFIGURED", "Pagamentos indisponíveis no momento. Tente mais tarde.");
       }
@@ -199,14 +202,15 @@ export async function createOrderFromReservation(input: CreateOrderInput): Promi
           id, code, campaign_id, customer_id, status, payment_mode, gateway, quantity,
           unit_price_cents, total_cents, currency, customer_name, customer_phone, customer_email,
           access_token_hash, idempotency_key, reservation_id, expires_at,
-          terms_accepted_at, privacy_accepted_at, terms_version, source, ip_hash)
+          terms_accepted_at, privacy_accepted_at, terms_version, source, ip_hash, created_by_user_id)
         VALUES (
           ${orderId}::uuid, ${code}, ${campaign.id}::uuid, ${customer.id}::uuid, 'PENDING_PAYMENT',
           ${payment.mode}::payment_mode, ${gateway}::payment_gateway, ${numbers.length},
           ${unitPriceCents}, ${totalCents}, 'BRL', ${input.customer.name}, ${phone}, ${input.customer.email ?? null},
           ${orderAccessTokenHash(orderId)}, ${input.idempotencyKey}, ${reservation.id}::uuid,
           now() + make_interval(mins => ${campaign.payment_minutes}::int),
-          now(), now(), ${termsVersionOf(legal?.regulation)}, 'WEB', ${input.ipHash ?? null})
+          now(), now(), ${termsVersionOf(legal?.regulation)}, ${input.admin ? "ADMIN" : "WEB"}, ${input.ipHash ?? null},
+          ${input.admin?.userId ?? null}::uuid)
         RETURNING id, expires_at`;
       if (!order) throw new Error("falha ao criar pedido");
 

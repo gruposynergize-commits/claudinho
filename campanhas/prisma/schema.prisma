@@ -281,6 +281,8 @@ model Campaign {
   contactInstagram        String?        @map("contact_instagram")
   /// Lista de perguntas frequentes: [{ "q": "...", "a": "..." }]
   faq                     Json           @default("[]")
+  /// Modelo da mensagem de confirmação (WhatsApp). Marcadores: {campanha} {pedido} {numeros} {link}
+  confirmationMessage     String?        @map("confirmation_message")
   complianceConfirmedAt   DateTime?      @map("compliance_confirmed_at") @db.Timestamptz(3)
   complianceConfirmedById String?        @map("compliance_confirmed_by_id") @db.Uuid
   /// Incrementado a cada alteração pelo painel (controle otimista).

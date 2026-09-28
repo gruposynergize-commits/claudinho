@@ -54,6 +54,34 @@ export async function confirmManualPayment(input: ManualConfirmInput, actor: Act
   if (input.reference.trim().length < 3) throw new AppError("VALIDATION", "Informe a referência do pagamento no extrato.");
   if (input.reason.trim().length < 5) throw new AppError("VALIDATION", "Informe o motivo da confirmação manual.");
 
+  // Valor menor que o total nunca confirma. A tentativa fica registrada fora da
+  // transação principal (que seria desfeita pelo erro). O total do pedido é
+  // imutável, então esta leitura prévia é definitiva.
+  const pre = await db().order.findUnique({ where: { id: input.orderId }, select: { id: true, totalCents: true, paymentMode: true } });
+  if (!pre) throw new AppError("NOT_FOUND", "Pedido não encontrado.");
+  if (pre.paymentMode === "MANUAL" && input.verifiedAmountCents < pre.totalCents) {
+    await db().paymentEvent.create({
+      data: {
+        orderId: pre.id,
+        source: "MANUAL",
+        type: "MANUAL_AMOUNT_INSUFFICIENT",
+        processingStatus: "REJECTED",
+        payload: { expectedCents: pre.totalCents, verifiedCents: input.verifiedAmountCents, by: actor.label },
+        processedAt: new Date(),
+      },
+    });
+    await logEvent("WARN", "PAYMENT", "Confirmação manual recusada: valor menor que o total", {
+      orderId: pre.id,
+      expectedCents: pre.totalCents,
+      verifiedCents: input.verifiedAmountCents,
+      by: actor.label,
+    });
+    throw new AppError(
+      "VALIDATION",
+      `O valor identificado (${formatBRL(input.verifiedAmountCents)}) é menor que o total do pedido (${formatBRL(pre.totalCents)}). O pedido não pode ser confirmado.`,
+    );
+  }
+
   const result = await transaction(async (tx) => {
     const order = await lockOrder(tx, input.orderId);
     if (!order) throw new AppError("NOT_FOUND", "Pedido não encontrado.");
@@ -66,20 +94,7 @@ export async function confirmManualPayment(input: ManualConfirmInput, actor: Act
     if (order.status === "PAID") throw new AppError("INVALID_STATE", "Este pedido já está pago.");
     if (order.status === "REFUNDED") throw new AppError("INVALID_STATE", "Este pedido foi reembolsado.");
     if (input.verifiedAmountCents < order.total_cents) {
-      await tx.paymentEvent.create({
-        data: {
-          orderId: order.id,
-          source: "MANUAL",
-          type: "MANUAL_AMOUNT_INSUFFICIENT",
-          processingStatus: "REJECTED",
-          payload: { expectedCents: order.total_cents, verifiedCents: input.verifiedAmountCents, by: actor.label },
-          processedAt: new Date(),
-        },
-      });
-      throw new AppError(
-        "VALIDATION",
-        `O valor identificado (${formatBRL(input.verifiedAmountCents)}) é menor que o total do pedido (${formatBRL(order.total_cents)}). O pedido não pode ser confirmado.`,
-      );
+      throw new AppError("VALIDATION", "O valor identificado é menor que o total do pedido. O pedido não pode ser confirmado.");
     }
     if (input.verifiedAmountCents > order.total_cents && input.reason.trim().length < 10) {
       throw new AppError("VALIDATION", "Valor maior que o total: descreva no motivo como a diferença será tratada.");

@@ -62,7 +62,7 @@ export function formatBRL(cents: number): string {
   const reais = Math.trunc(cents / 100);
   const centavos = String(cents % 100).padStart(2, "0");
   const withThousands = String(reais).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  return `R$ ${withThousands},${centavos}`;
+  return `R$\u00a0${withThousands},${centavos}`;
 }
 
 /** "4,90" | "4.90" | "4" → 490. Usado em formulários do painel. */

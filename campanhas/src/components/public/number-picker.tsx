@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api, safeStorage } from "@/lib/api-client";
+import { api, safeStorage, type ApiResult } from "@/lib/api-client";
 import { formatBRL } from "@/lib/money";
 import { formatNumber } from "@/lib/format";
 
@@ -65,58 +65,79 @@ export function NumberPicker(props: Props) {
   const pages = Math.ceil(props.totalNumbers / PAGE_SIZE);
   const fmt = useCallback((n: number) => formatNumber(n, props.numberDigits), [props.numberDigits]);
 
-  const load = useCallback(async () => {
-    const r = await api<NumbersData>(`/api/public/campaigns/${props.slug}/numbers`);
-    if (r.ok) {
-      setData(r.data);
-      setLoadError(null);
-    } else {
+  // Espelho da seleção para o carregamento periódico (atualizado após cada render).
+  const selectedRef = useRef(selected);
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
+  const restored = useRef(false);
+
+  const numbersUrl = `/api/public/campaigns/${props.slug}/numbers`;
+
+  /** Aplica a resposta de estados (chamada sempre de forma assíncrona). */
+  const apply = useCallback((r: ApiResult<NumbersData>) => {
+    if (!r.ok) {
       setLoadError(r.error.message);
+      return;
     }
-  }, [props.slug]);
+    const d = r.data;
+    const available = (n: number) => d.statuses[n - d.firstNumber] === "A";
+    setData(d);
+    setLoadError(null);
 
-  // Carrega seleção salva e estados; atualiza periodicamente com a aba visível.
-  useEffect(() => {
-    const saved = safeStorage.get("session", storageSel);
-    if (saved) {
+    let lost: number[];
+    if (!restored.current) {
+      // Primeira carga: restaura a seleção salva nesta aba (só o que segue disponível).
+      restored.current = true;
+      let saved: number[] = [];
       try {
-        const arr = JSON.parse(saved) as unknown;
-        if (Array.isArray(arr)) setSelected(new Set(arr.filter((n): n is number => Number.isInteger(n))));
+        const arr = JSON.parse(safeStorage.get("session", storageSel) ?? "[]") as unknown;
+        if (Array.isArray(arr)) saved = arr.filter((n): n is number => Number.isInteger(n));
       } catch {
-        // ignora
+        saved = [];
       }
+      lost = saved.filter((n) => !available(n));
+      setSelected(new Set(saved.filter(available)));
+    } else {
+      // Se algum número selecionado deixou de estar disponível, avisa e remove.
+      lost = [...selectedRef.current].filter((n) => !available(n));
+      if (lost.length > 0) setSelected((prev) => new Set([...prev].filter(available)));
     }
-    void load();
-    const id = setInterval(() => {
-      if (document.visibilityState === "visible") void load();
-    }, 20_000);
-    const onFocus = () => void load();
-    window.addEventListener("focus", onFocus);
-    return () => {
-      clearInterval(id);
-      window.removeEventListener("focus", onFocus);
+    if (lost.length > 0) {
+      setMessage({ kind: "info", text: `Removemos ${lost.map(fmt).join(", ")}: acabaram de ser escolhidos por outra pessoa.` });
+    }
+  }, [storageSel, fmt]);
+
+  const load = useCallback(async () => apply(await api<NumbersData>(numbersUrl)), [apply, numbersUrl]);
+
+  // Carrega estados (e a seleção salva); atualiza periodicamente com a aba visível.
+  useEffect(() => {
+    let alive = true;
+    const tick = () => {
+      void api<NumbersData>(numbersUrl).then((r) => {
+        if (alive) apply(r);
+      });
     };
-  }, [load, storageSel]);
+    tick();
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") tick();
+    }, 20_000);
+    window.addEventListener("focus", tick);
+    return () => {
+      alive = false;
+      clearInterval(id);
+      window.removeEventListener("focus", tick);
+    };
+  }, [apply, numbersUrl]);
 
   useEffect(() => {
-    safeStorage.set("session", storageSel, JSON.stringify([...selected]));
+    if (restored.current) safeStorage.set("session", storageSel, JSON.stringify([...selected]));
   }, [selected, storageSel]);
 
   const stateOf = useCallback(
     (n: number): string => data?.statuses[n - props.firstNumber] ?? "A",
     [data, props.firstNumber],
   );
-
-  // Se algum número selecionado deixou de estar disponível, avisa e remove.
-  useEffect(() => {
-    if (!data) return;
-    const lost = [...selected].filter((n) => stateOf(n) !== "A");
-    if (lost.length > 0) {
-      setSelected((prev) => new Set([...prev].filter((n) => !lost.includes(n))));
-      setMessage({ kind: "info", text: `Removemos ${lost.map(fmt).join(", ")}: acabaram de ser escolhidos por outra pessoa.` });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
 
   // Busca com debounce: vai para a página do número digitado.
   useEffect(() => {

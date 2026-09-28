@@ -11,16 +11,16 @@ import {
 describe("dinheiro em centavos", () => {
   it("10 × R$ 4,90 = R$ 49,00 sem ponto flutuante", () => {
     expect(multiplyCents(490, 10)).toBe(4900);
-    expect(formatBRL(4900)).toBe("R$ 49,00");
+    expect(formatBRL(4900)).toBe("R$\u00a049,00");
   });
 
   it("7 × R$ 4,90 = R$ 34,30", () => {
     expect(multiplyCents(490, 7)).toBe(3430);
-    expect(formatBRL(3430)).toBe("R$ 34,30");
+    expect(formatBRL(3430)).toBe("R$\u00a034,30");
   });
 
   it("1.200 × R$ 4,90 = R$ 5.880,00", () => {
-    expect(formatBRL(multiplyCents(490, 1200))).toBe("R$ 5.880,00");
+    expect(formatBRL(multiplyCents(490, 1200))).toBe("R$\u00a05.880,00");
   });
 
   it("rejeita quantidades e valores inválidos", () => {

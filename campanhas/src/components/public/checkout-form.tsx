@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import { api, safeStorage } from "@/lib/api-client";
+import { useStoredValue } from "@/lib/use-stored-value";
 import { formatBRL } from "@/lib/money";
 import { Countdown } from "./countdown";
 
@@ -49,15 +50,14 @@ export function CheckoutForm({ slug, campaignName }: { slug: string; campaignNam
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const token = typeof window === "undefined" ? null : safeStorage.get("session", `res:${slug}`);
+  // undefined = ainda hidratando; null = nenhuma reserva nesta aba.
+  const token = useStoredValue("session", `res:${slug}`);
 
   useEffect(() => {
-    const t = safeStorage.get("session", `res:${slug}`);
-    if (!t) {
-      setState("missing");
-      return;
-    }
-    void api<ReservationView>("/api/public/reservations/current", { body: { token: t } }).then((r) => {
+    if (!token) return;
+    let cancelled = false;
+    void api<ReservationView>("/api/public/reservations/current", { body: { token } }).then((r) => {
+      if (cancelled) return;
       if (!r.ok) {
         setState("missing");
         return;
@@ -65,7 +65,11 @@ export function CheckoutForm({ slug, campaignName }: { slug: string; campaignNam
       setRes(r.data);
       setState(r.data.usable ? "ready" : "expired");
     });
-  }, [slug]);
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+  const view = token === null ? "missing" : state;
 
   function idempotencyKey(): string {
     const k = `idem:${slug}:${token ?? ""}`;
@@ -128,13 +132,13 @@ export function CheckoutForm({ slug, campaignName }: { slug: string; campaignNam
     router.push(`/campanha/${slug}/numeros`);
   }
 
-  if (state === "loading") {
+  if (view === "loading") {
     return <div className="mt-6 h-40 animate-pulse rounded-2xl bg-stone-200" aria-label="Carregando reserva" />;
   }
-  if (state === "missing" || state === "expired" || !res) {
+  if (view === "missing" || view === "expired" || !res) {
     return (
       <div className="card mt-6 text-center">
-        <p className="font-semibold">{state === "expired" ? "Sua reserva expirou." : "Nenhuma reserva ativa encontrada."}</p>
+        <p className="font-semibold">{view === "expired" ? "Sua reserva expirou." : "Nenhuma reserva ativa encontrada."}</p>
         <p className="mt-1 text-stone-600">Os números voltaram para a disputa. Escolha novamente — eles podem ainda estar disponíveis.</p>
         <Link href={`/campanha/${slug}/numeros`} className="btn-primary mt-4 w-full">
           Escolher números

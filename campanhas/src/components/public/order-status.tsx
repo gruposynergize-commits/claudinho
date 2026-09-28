@@ -32,7 +32,7 @@ export function OrderStatus({ token, initial }: { token: string; initial: OrderV
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<{ kind: "error" | "info"; text: string } | null>(null);
-  const startedAt = useRef(Date.now());
+  const startedAt = useRef<number | null>(null);
 
   const refresh = useCallback(async () => {
     const r = await api<OrderView>(`/api/public/orders/${token}`);
@@ -42,6 +42,7 @@ export function OrderStatus({ token, initial }: { token: string; initial: OrderV
   // Enquanto aguarda pagamento: consulta a cada 5 s (10 s após 3 min).
   useEffect(() => {
     if (order.status !== "PENDING_PAYMENT") return;
+    startedAt.current ??= Date.now();
     const interval = Date.now() - startedAt.current > 180_000 ? 10_000 : 5_000;
     const id = setTimeout(() => {
       if (document.visibilityState === "visible") void refresh();

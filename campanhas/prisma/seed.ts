@@ -29,6 +29,15 @@ const CAMPAIGN = {
   paymentMinutes: 30,
 };
 
+// Modelo pedido pela organização (requisito 25). Marcadores: {pedido} {numeros} {link} {campanha}
+const CONFIRMATION_MESSAGE = [
+  "Olá! Seu pagamento da campanha do Alek foi confirmado.",
+  "Pedido: {pedido}",
+  "Seus números:",
+  "{numeros}",
+  "Obrigado por ajudar o Alek! ❤️🐱",
+].join("\n");
+
 const PRIZES = [
   { position: 1, name: "Samsung Galaxy A05s usado", description: "1º prêmio." },
   { position: 2, name: "Cesta de doces da Dmialo", description: "2º prêmio." },
@@ -67,7 +76,7 @@ async function main() {
 
     await prisma.$transaction(async (tx) => {
       const campaign = await tx.campaign.create({
-        data: { ...CAMPAIGN, status: "DRAFT", faq: FAQ },
+        data: { ...CAMPAIGN, status: "DRAFT", faq: FAQ, confirmationMessage: CONFIRMATION_MESSAGE },
       });
 
       // 0001..1200 em uma única instrução.

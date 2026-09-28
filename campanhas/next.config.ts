@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
       // Páginas de pedido carregam token na URL: nunca em cache compartilhado.
       { source: "/pedido/:path*", headers: [{ key: "Cache-Control", value: "no-store" }, { key: "Referrer-Policy", value: "no-referrer" }] },
       { source: "/admin/:path*", headers: [{ key: "Cache-Control", value: "no-store" }, { key: "X-Robots-Tag", value: "noindex, nofollow" }] },
+      { source: "/status", headers: [{ key: "Cache-Control", value: "no-store" }, { key: "X-Robots-Tag", value: "noindex, nofollow" }] },
     ];
   },
 };

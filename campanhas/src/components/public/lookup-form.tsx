@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { api, safeStorage } from "@/lib/api-client";
+import { useMemo, useState } from "react";
+import { api } from "@/lib/api-client";
+import { useStoredValue } from "@/lib/use-stored-value";
 
 type Saved = { token: string; code: string; campaign: string };
 
@@ -13,15 +14,15 @@ export function LookupForm() {
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [saved, setSaved] = useState<Saved[]>([]);
-
-  useEffect(() => {
+  const raw = useStoredValue("local", "orders");
+  const saved = useMemo<Saved[]>(() => {
     try {
-      setSaved(JSON.parse(safeStorage.get("local", "orders") ?? "[]") as Saved[]);
+      const v = JSON.parse(raw ?? "[]") as unknown;
+      return Array.isArray(v) ? (v as Saved[]).filter((o) => typeof o?.token === "string" && typeof o?.code === "string") : [];
     } catch {
-      setSaved([]);
+      return [];
     }
-  }, []);
+  }, [raw]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();

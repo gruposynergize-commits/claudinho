@@ -27,7 +27,8 @@ export function proxy(request: NextRequest) {
   ].join("; ");
 
   const { pathname } = request.nextUrl;
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login" && !request.cookies.has(sessionCookieName())) {
+  const restricted = (pathname.startsWith("/admin") && pathname !== "/admin/login") || pathname === "/status";
+  if (restricted && !request.cookies.has(sessionCookieName())) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     url.search = `?next=${encodeURIComponent(pathname)}`;
