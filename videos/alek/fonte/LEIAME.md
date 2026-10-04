@@ -17,3 +17,9 @@
   - cartela final com Pix, Vakinha (com QR code) e "Compartilhe esse vídeo".
 - Uso: `python3 montar_v2.py preview 12.5 40` (quadros de conferência) ou
   `python3 montar_v2.py render K N pedaco.mp4` (renderiza o pedaço K de N; depois juntar com o áudio).
+
+## Atualização de 04/10 (sem áudio)
+
+- `montar_v3.py` — gera `Alek_atualizacao_04-10.mp4` (1080x1920, ~55 s, sem áudio): cada trecho tem um
+  vídeo/foto/comprovante com um texto na tela e corte seco para o próximo; cartela final com Pix e Vakinha.
+  O nome de quem recebeu o Pix de R$ 810 aparece desfocado no comprovante.
