@@ -299,6 +299,9 @@ def with_alpha(im, a):
 
 # ---------------------------------------------------------------- roteiro
 SEGS = []   # (início, fim, cena, imagem_do_texto)
+HEADERS = {}  # índice do trecho -> texto extra no topo da tela
+HEADER_CENTER_Y = 300
+TEXT_Y = {}    # índice do trecho -> centro do texto principal, quando não for o padrão
 
 
 def build():
@@ -315,7 +318,7 @@ def build():
     b8 = photo("8.webp").crop((56, 48, 1062, 1248))                   # conta em aberto: falta R$ 370,00
 
     scenes = [
-        (3.2, Vid(V["V3"], 0.0), "Uma atualização do nosso *Alek*", 74),
+        (4.0, Vid(V["V2"], 8.5, speed=0.72, zoom=1.2, focus=(0.5, 0.38)), "Uma atualização do nosso *Alek*", 74),
         (3.9, Vid(V["V1"], 0.0), "Na sexta, ele fez a *ressonância* e a *citologia*.", 60),
         (5.6, Still(p4_wide, 1.0, 1.06, (0.55, 0.45)),
          "O resultado sai na *segunda* e vai mostrar se o nódulo dele precisa de *cirurgia*.", 60),
@@ -335,17 +338,26 @@ def build():
     for dur, scene, text, size in scenes:
         SEGS.append((t, t + dur, scene, text_block(text, size) if text else None))
         t += dur
+    # abertura: chamada "Dia 3" e o título juntos no topo, deixando o Alek inteiro à mostra
+    HEADERS[0] = text_block("*Dia 3* pedindo ajuda para o Alek", 68)
+    a0, b0, sc0, _ = SEGS[0]
+    SEGS[0] = (a0, b0, sc0, text_block("Uma atualização do nosso *Alek*", 54, max_w=940))
+    TEXT_Y[0] = 505
     return t
 
 
 def frame_at(T):
-    for a, b, scene, txt in SEGS:
+    for k, (a, b, scene, txt) in enumerate(SEGS):
         if a <= T < b:
             break
     frame = scene.render(T - a, b - a).convert("RGBA")
+    u = 1.0 if a == 0 else ease((T - a) / 0.25)   # 1º trecho já visível (miniatura do vídeo)
     if txt is not None:
-        u = 1.0 if a == 0 else ease((T - a) / 0.25)   # 1º texto já visível (miniatura do vídeo)
-        frame.alpha_composite(with_alpha(txt, u), ((W - txt.width) // 2, TEXT_CENTER_Y - txt.height // 2 + round((1 - u) * 18)))
+        cy = TEXT_Y.get(k, TEXT_CENTER_Y)
+        frame.alpha_composite(with_alpha(txt, u), ((W - txt.width) // 2, cy - txt.height // 2 + round((1 - u) * 18)))
+    if k in HEADERS:
+        hd = HEADERS[k]
+        frame.alpha_composite(with_alpha(hd, u), ((W - hd.width) // 2, HEADER_CENTER_Y - hd.height // 2))
     return frame.convert("RGB")
 
 
